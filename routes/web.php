@@ -28,11 +28,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/tutor/message', [TutorController::class, 'sendMessage'])->name('tutor.message');
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
+    Route::post('/lesson-chat', [TutorController::class, 'lessonChat'])
+        ->name('lesson.chat');
     
     // Default profile routes from Breeze (modified to show)
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
 });
 
 require __DIR__.'/auth.php';

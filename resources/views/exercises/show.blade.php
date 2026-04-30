@@ -226,72 +226,99 @@
             setTimeout(() => window.editor.refresh(), 100);
 
             // Submit Handler
-            document.getElementById('btn-verificar').addEventListener('click', async function() {
-                const btn = this;
-                const statusEl = document.getElementById('status-message');
+            document.getElementById('btn-verificar').addEventListener('click', function() {
+                const currentCode = (window.editor && typeof window.editor.getValue === 'function')
+                    ? window.editor.getValue().trim()
+                    : '';
+
                 const resultPanel = document.getElementById('result-panel');
+
+                // Don't submit if empty
+                if (!currentCode || currentCode.length === 0) {
+                    resultPanel.innerHTML =
+                        '<div class="p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg mt-3">' +
+                        '<p class="text-yellow-400 font-medium">⚠️ Escribe tu respuesta antes de verificar. ' +
+                        '¡Mira la estructura de referencia de arriba! 💡</p>' +
+                        '</div>';
+                    return; // stop here, don't call the API
+                }
+
                 const alpineEl = document.querySelector('[x-data]');
-                const alpineData = alpineEl.__x ? alpineEl.__x.$data : alpineEl._x_dataStack[0];
+                const alpineData = (() => {
+                    try {
+                        if (alpineEl && alpineEl.__x) return alpineEl.__x.$data;
+                        if (alpineEl && alpineEl._x_dataStack) return alpineEl._x_dataStack[0];
+                    } catch(e) {}
+                    return {};
+                })();
 
                 if (alpineData.loading) return;
 
                 alpineData.loading = true;
-                btn.disabled = true;
-                statusEl.innerText = 'Verificando...';
+                this.disabled = true;
+                const statusEl = document.getElementById('status-message');
+                if (statusEl) statusEl.innerText = 'Verificando...';
                 resultPanel.innerHTML = '';
                 
-                const currentCode = window.editor.getValue();
-                
-                try {
-                    const response = await fetch('{{ route("exercises.submit", $exercise->id ?? 0) }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ 
-                            code: currentCode,
-                            revealed: alpineData.revealed
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
+                fetch("{{ route('exercises.submit', $exercise->id ?? 0) }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        code: currentCode,
+                        revealed: alpineData.revealed ?? false
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
                     if (data.correct) {
-                        statusEl.className = 'text-sm font-medium text-secondary flex items-center gap-2';
-                        statusEl.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Correcto';
+                        if (statusEl) {
+                            statusEl.className = 'text-sm font-medium text-secondary flex items-center gap-2';
+                            statusEl.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Correcto';
+                        }
                         
-                        resultPanel.innerHTML = `
-                            <div class="p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
-                                <p class="text-green-400 font-medium">✅ ¡Correcto! +${data.xp_earned} XP 🎉</p>
-                            </div>
-                        `;
+                        resultPanel.innerHTML =
+                            '<div class="p-4 bg-green-500/20 border border-green-500/30 rounded-lg mt-3">' +
+                            '<p class="text-green-400 font-bold text-lg">✅ ¡Correcto! +' + data.xp_earned + ' XP 🎉</p>' +
+                            '<p class="text-green-300 text-sm mt-1">¡Excelente trabajo! Pasando a la siguiente lección...</p>' +
+                            '</div>';
 
                         alpineData.earnedXp = data.xp_earned;
                         alpineData.showSuccess = true;
                         
                         setTimeout(() => {
-                            window.location.href = "{{ $nextLesson ? route('lessons.show', [$nextLesson->course->slug, $nextLesson->slug]) : route('courses.index') }}";
+                            @if(isset($nextLesson))
+                                window.location.href = "{{ route('lessons.show', [$nextLesson->course->slug, $nextLesson->slug]) }}";
+                            @else
+                                window.location.href = "{{ route('courses.index') }}";
+                            @endif
                         }, 2000);
                     } else {
-                        alpineData.attempts++;
-                        statusEl.className = 'text-sm font-medium text-error flex items-center gap-2';
-                        statusEl.innerHTML = '<span class="material-symbols-outlined text-sm">error</span> Error';
+                        alpineData.attempts = (alpineData.attempts || 0) + 1;
+                        if (statusEl) {
+                            statusEl.className = 'text-sm font-medium text-error flex items-center gap-2';
+                            statusEl.innerHTML = '<span class="material-symbols-outlined text-sm">error</span> Error';
+                        }
                         
-                        resultPanel.innerHTML = `
-                            <div class="p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
-                                <p class="text-red-400 font-medium">❌ ${data.message}</p>
-                            </div>
-                        `;
+                        resultPanel.innerHTML =
+                            '<div class="p-4 bg-red-500/20 border border-red-500/30 rounded-lg mt-3">' +
+                            '<p class="text-red-400 font-medium">❌ ' + (data.message || '¡Casi! Inténtalo de nuevo 💪') + '</p>' +
+                            '</div>';
                     }
-                } catch (error) {
-                    console.error('Error:', error);
-                    statusEl.className = 'text-sm font-medium text-error';
-                    statusEl.innerText = 'Error al verificar. Revisa tu conexión.';
-                } finally {
+                })
+                .catch(err => {
+                    console.error('Submit fetch error', err);
+                    resultPanel.innerHTML =
+                        '<div class="p-4 bg-red-500/20 border border-red-500/30 rounded-lg mt-3">' +
+                        '<p class="text-red-400 font-medium">❌ Error de conexión. Recarga la página e intenta de nuevo.</p>' +
+                        '</div>';
+                })
+                .finally(() => {
                     alpineData.loading = false;
-                    btn.disabled = false;
-                }
+                    this.disabled = false;
+                });
             });
         });
     </script>

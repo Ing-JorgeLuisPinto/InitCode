@@ -29,9 +29,15 @@ class DashboardController extends Controller
         $completedCount = UserProgress::where('user_id', $user->id)->count();
         $recentProgress = UserProgress::where('user_id', $user->id)
             ->with('lesson.course')
-            ->latest()
+            ->latest('completed_at')
             ->take(5)
-            ->get();
+            ->get()
+            ->map(function($progress) {
+                $progress->completed_at = $progress->completed_at 
+                    ? \Carbon\Carbon::parse($progress->completed_at) 
+                    : null;
+                return $progress;
+            });
 
         return view('dashboard', compact('user', 'nextLesson', 'completedCount', 'recentProgress'));
     }

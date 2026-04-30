@@ -24,50 +24,120 @@ class TutorController extends Controller
     {
         $request->validate(['message' => 'required|string|max:1000']);
 
-        $user = Auth::user();
         ChatMessage::create([
-            'user_id' => $user->id,
+            'user_id' => auth()->id(),
             'role' => 'user',
             'content' => $request->message
         ]);
 
-        $history = ChatMessage::where('user_id', $user->id)
-            ->latest('id')
-            ->take(20)
-            ->get()
-            ->reverse();
+        $history = ChatMessage::where('user_id', auth()->id())
+            ->latest()->take(18)->get()->reverse()->values();
 
-        $messages = [[
-            'role' => 'system',
-            'content' => 'Eres CodeBot, el tutor amigable de CodePath. Enseñas programación a principiantes absolutos. Explica siempre con analogías simples de la vida cotidiana, sin jerga técnica. Eres paciente, positivo y muy alentador. Usa emojis ocasionalmente. Responde siempre en español. Cuando alguien no entienda algo, da un ejemplo concreto y sencillo.'
-        ]];
+        $contents = [];
+
+        // System context as first exchange
+        $contents[] = [
+            'role' => 'user',
+            'parts' => [['text' => 'Eres CodeBot, tutor amigable de CodePath. Enseñas programación a principiantes. Explica con analogías simples, sin jerga técnica. No des soluciones directas, guía al usuario.']]
+        ];
+        $contents[] = [
+            'role' => 'model',
+            'parts' => [['text' => '¡Hola! Entendido, soy CodeBot. Estoy listo para ayudar a los estudiantes de CodePath a aprender de forma divertida y clara. ¿En qué puedo ayudarte hoy?']]
+        ];
 
         foreach ($history as $msg) {
-            $messages[] = ['role' => $msg->role, 'content' => $msg->content];
+            $contents[] = [
+                'role' => $msg->role === 'assistant' ? 'model' : 'user',
+                'parts' => [['text' => $msg->content]]
+            ];
         }
 
-        $apiKey = env('OPENAI_API_KEY');
-        
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $apiKey,
-            'Content-Type' => 'application/json'
-        ])->post('https://api.openai.com/v1/chat/completions', [
-            'model' => 'gpt-4o-mini',
-            'messages' => $messages,
-            'max_tokens' => 500,
-            'temperature' => 0.7
+        $reply = $this->callGemini($contents);
+
+        ChatMessage::create([
+            'user_id' => auth()->id(),
+            'role' => 'assistant',
+            'content' => $reply
         ]);
 
-        if ($response->successful()) {
-            $aiMessage = $response->json()['choices'][0]['message']['content'];
-            ChatMessage::create([
-                'user_id' => $user->id,
-                'role' => 'assistant',
-                'content' => $aiMessage
-            ]);
-            return response()->json(['message' => $aiMessage]);
+        return response()->json(['message' => $reply]);
+    }
+
+    public function lessonChat(Request $request)
+    {
+        $request->validate(['message' => 'required|string|max:1000']);
+
+        $prompt = "Contexto: Estás en la lección '{$request->lesson_title}'.
+Contenido: {$request->lesson_content}
+Ejercicio: {$request->exercise_instructions}
+
+Usuario pregunta: {$request->message}
+
+REGLAS:
+1. Sé breve y motivador.
+2. NUNCA des el código de la solución.
+3. Da pistas conceptuales.
+4. Si preguntan algo fuera de programación, vuelve al tema.";
+
+        $reply = $this->callGemini([
+            [
+                'role' => 'user',
+                'parts' => [['text' => $prompt]]
+            ]
+        ]);
+
+        return response()->json(['message' => $reply]);
+    }
+
+    private function callGemini(array $contents): string
+    {
+        $key = env('GEMINI_API_KEY');
+
+        if (!$key) {
+            \Log::error('Gemini: GEMINI_API_KEY not set');
+            return 'Error: falta la API key. 😅';
         }
 
-        return response()->json(['message' => 'Lo siento, tuve un problema conectando con mi cerebro de IA. ¿Puedes intentar de nuevo?'], 500);
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $key;
+
+        try {
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])
+                ->post($url, [
+                    'contents' => $contents,
+                    'generationConfig' => [
+                        'temperature' => 0.7,
+                        'maxOutputTokens' => 600,
+                    ],
+                    'safetySettings' => [
+                        [
+                            'category' => 'HARM_CATEGORY_HARASSMENT',
+                            'threshold' => 'BLOCK_NONE'
+                        ],
+                        [
+                            'category' => 'HARM_CATEGORY_HATE_SPEECH', 
+                            'threshold' => 'BLOCK_NONE'
+                        ]
+                    ]
+                ]);
+
+            \Log::info('Gemini HTTP status: ' . $response->status());
+            \Log::info('Gemini response: ' . substr($response->body(), 0, 300));
+
+            if ($response->successful()) {
+                $json = $response->json();
+                $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                if ($text) return trim($text);
+            }
+
+            \Log::error('Gemini failed: ' . $response->body());
+
+        } catch (\Exception $e) {
+            \Log::error('Gemini exception: ' . $e->getMessage());
+        }
+
+        return 'No pude responder en este momento. Intenta de nuevo. 😅';
     }
 }

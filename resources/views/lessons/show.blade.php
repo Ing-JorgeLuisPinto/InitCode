@@ -226,73 +226,268 @@
             setTimeout(() => window.editor.refresh(), 100);
 
             // Submit Handler
-            document.getElementById('btn-verificar').addEventListener('click', async function() {
-                const btn = this;
-                const statusEl = document.getElementById('status-message');
+            document.getElementById('btn-verificar').addEventListener('click', function() {
+                const currentCode = (window.editor && typeof window.editor.getValue === 'function')
+                    ? window.editor.getValue().trim()
+                    : '';
+
                 const resultPanel = document.getElementById('result-panel');
+
+                // Don't submit if empty
+                if (!currentCode || currentCode.length === 0) {
+                    resultPanel.innerHTML =
+                        '<div class="p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg mt-3">' +
+                        '<p class="text-yellow-400 font-medium">⚠️ Escribe tu respuesta antes de verificar. ' +
+                        '¡Mira la estructura de referencia de arriba! 💡</p>' +
+                        '</div>';
+                    return; // stop here, don't call the API
+                }
+
                 const alpineEl = document.querySelector('[x-data]');
-                const alpineData = alpineEl.__x ? alpineEl.__x.$data : alpineEl._x_dataStack[0];
+                const alpineData = (() => {
+                    try {
+                        if (alpineEl && alpineEl.__x) return alpineEl.__x.$data;
+                        if (alpineEl && alpineEl._x_dataStack) return alpineEl._x_dataStack[0];
+                    } catch(e) {}
+                    return {};
+                })();
 
                 if (alpineData.loading) return;
 
                 alpineData.loading = true;
-                btn.disabled = true;
-                statusEl.innerText = 'Verificando...';
+                this.disabled = true;
+                const statusEl = document.getElementById('status-message');
+                if (statusEl) statusEl.innerText = 'Verificando...';
                 resultPanel.innerHTML = '';
                 
-                const currentCode = window.editor.getValue();
-                
-                try {
-                    const response = await fetch('{{ route("exercises.submit", $exercise->id ?? 0) }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ 
-                            code: currentCode,
-                            revealed: alpineData.revealed
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
+                fetch("{{ route('exercises.submit', $exercise->id ?? 0) }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        code: currentCode,
+                        revealed: alpineData.revealed ?? false
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
                     if (data.correct) {
-                        statusEl.className = 'text-sm font-medium text-secondary flex items-center gap-2';
-                        statusEl.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Correcto';
+                        if (statusEl) {
+                            statusEl.className = 'text-sm font-medium text-secondary flex items-center gap-2';
+                            statusEl.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Correcto';
+                        }
                         
-                        resultPanel.innerHTML = `
-                            <div class="p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
-                                <p class="text-green-400 font-medium">✅ ¡Correcto! +${data.xp_earned} XP 🎉</p>
-                            </div>
-                        `;
+                        resultPanel.innerHTML =
+                            '<div class="p-4 bg-green-500/20 border border-green-500/30 rounded-lg mt-3">' +
+                            '<p class="text-green-400 font-bold text-lg">✅ ¡Correcto! +' + data.xp_earned + ' XP 🎉</p>' +
+                            '<p class="text-green-300 text-sm mt-1">¡Excelente trabajo! Pasando a la siguiente lección...</p>' +
+                            '</div>';
 
                         alpineData.earnedXp = data.xp_earned;
                         alpineData.showSuccess = true;
                         
                         setTimeout(() => {
-                            window.location.href = "{{ $nextLesson ? route('lessons.show', [$nextLesson->course->slug, $nextLesson->slug]) : route('courses.index') }}";
+                            @if(isset($nextLesson))
+                                window.location.href = "{{ route('lessons.show', [$nextLesson->course->slug, $nextLesson->slug]) }}";
+                            @else
+                                window.location.href = "{{ route('courses.index') }}";
+                            @endif
                         }, 2000);
                     } else {
-                        alpineData.attempts++;
-                        statusEl.className = 'text-sm font-medium text-error flex items-center gap-2';
-                        statusEl.innerHTML = '<span class="material-symbols-outlined text-sm">error</span> Error';
+                        alpineData.attempts = (alpineData.attempts || 0) + 1;
+                        if (statusEl) {
+                            statusEl.className = 'text-sm font-medium text-error flex items-center gap-2';
+                            statusEl.innerHTML = '<span class="material-symbols-outlined text-sm">error</span> Error';
+                        }
                         
-                        resultPanel.innerHTML = `
-                            <div class="p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
-                                <p class="text-red-400 font-medium">❌ ${data.message}</p>
-                            </div>
-                        `;
+                        resultPanel.innerHTML =
+                            '<div class="p-4 bg-red-500/20 border border-red-500/30 rounded-lg mt-3">' +
+                            '<p class="text-red-400 font-medium">❌ ' + (data.message || '¡Casi! Inténtalo de nuevo 💪') + '</p>' +
+                            '</div>';
                     }
-                } catch (error) {
-                    console.error('Error:', error);
-                    statusEl.className = 'text-sm font-medium text-error';
-                    statusEl.innerText = 'Error al verificar. Revisa tu conexión.';
-                } finally {
+                })
+                .catch(err => {
+                    console.error('Submit fetch error', err);
+                    resultPanel.innerHTML =
+                        '<div class="p-4 bg-red-500/20 border border-red-500/30 rounded-lg mt-3">' +
+                        '<p class="text-red-400 font-medium">❌ Error de conexión. Recarga la página e intenta de nuevo.</p>' +
+                        '</div>';
+                })
+                .finally(() => {
                     alpineData.loading = false;
-                    btn.disabled = false;
-                }
+                    this.disabled = false;
+                });
             });
         });
     </script>
+    {{-- Floating CodeBot button --}}
+    <div x-data="{
+            open: false,
+            messages: [
+                { 
+                    role: 'bot', 
+                    text: '¡Hola! Soy CodeBot 🤖 Estoy aquí para ayudarte con esta lección. Puedo explicarte conceptos y darte pistas, pero no te daré la respuesta directa. ¡Así aprendes más! 💪 ¿En qué te puedo ayudar?'
+                }
+            ],
+            input: '',
+            loading: false,
+            async send() {
+                if (!this.input.trim() || this.loading) return;
+                const msg = this.input.trim();
+                this.messages.push({ role: 'user', text: msg });
+                this.input = '';
+                this.loading = true;
+                
+                try {
+                    const res = await fetch('{{ route('lesson.chat') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            message: msg,
+                            lesson_title: '{{ addslashes($lesson->title) }}',
+                            lesson_content: '{{ addslashes(strip_tags($lesson->content ?? '')) }}',
+                            exercise_instructions: '{{ isset($exercise) ? addslashes($exercise->instructions ?? '') : '' }}'
+                        })
+                    });
+                    const data = await res.json();
+                    this.messages.push({ role: 'bot', text: data.message });
+                } catch(e) {
+                    this.messages.push({ 
+                        role: 'bot', 
+                        text: 'Hubo un error de conexión. Intenta de nuevo. 😅' 
+                    });
+                }
+                
+                this.loading = false;
+                this.$nextTick(() => {
+                    const chat = document.getElementById('lesson-chat-messages');
+                    if (chat) chat.scrollTop = chat.scrollHeight;
+                });
+            }
+         }"
+         class="fixed bottom-6 left-6 z-40">
+
+        {{-- Backdrop/Overlay --}}
+        <div x-show="open" 
+             @click="open = false"
+             class="fixed inset-0 z-30"
+             style="display:none;">
+        </div>
+
+        {{-- Chat panel --}}
+        <div x-show="open"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="mb-4 bg-gray-900 border border-gray-700 rounded-2xl 
+                    shadow-2xl flex flex-col overflow-hidden z-40"
+             style="width: 320px; height: 400px; display:none;">
+            
+            {{-- Header --}}
+            <div class="flex items-center justify-between px-4 py-3 
+                        bg-blue-600 text-white">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🤖</span>
+                    <div>
+                        <p class="font-semibold text-sm">CodeBot</p>
+                        <p class="text-xs text-blue-200">
+                            Te ayuda sin darte las respuestas
+                        </p>
+                    </div>
+                </div>
+                <button @click.stop="open = false" 
+                        type="button"
+                        class="text-blue-200 hover:text-white transition text-lg leading-none">
+                    ✕
+                </button>
+            </div>
+            
+            {{-- Messages --}}
+            <div id="lesson-chat-messages" 
+                 class="flex-1 overflow-y-auto p-3 space-y-3">
+                <template x-for="(msg, i) in messages" :key="i">
+                    <div :class="msg.role === 'user' 
+                        ? 'flex justify-end' 
+                        : 'flex justify-start'">
+                        <div :class="msg.role === 'user'
+                            ? 'bg-blue-600 text-white rounded-2xl rounded-tr-sm px-3 py-2 max-w-[85%] text-sm'
+                            : 'bg-gray-800 text-gray-200 rounded-2xl rounded-tl-sm px-3 py-2 max-w-[85%] text-sm'"
+                             x-text="msg.text">
+                        </div>
+                    </div>
+                </template>
+                
+                {{-- Loading dots --}}
+                <div x-show="loading" class="flex justify-start">
+                    <div class="bg-gray-800 rounded-2xl rounded-tl-sm 
+                                px-4 py-3">
+                        <div class="flex gap-1">
+                            <div class="w-2 h-2 bg-gray-500 rounded-full 
+                                        animate-bounce" 
+                                 style="animation-delay: 0ms"></div>
+                            <div class="w-2 h-2 bg-gray-500 rounded-full 
+                                        animate-bounce" 
+                                 style="animation-delay: 150ms"></div>
+                            <div class="w-2 h-2 bg-gray-500 rounded-full 
+                                        animate-bounce" 
+                                 style="animation-delay: 300ms"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {{-- Suggested questions --}}
+            <div class="px-3 pb-2 flex gap-2 overflow-x-auto">
+                <button @click="input = '¿Me das una pista?'; send()"
+                        class="text-xs bg-gray-800 text-blue-400 border 
+                               border-blue-500/30 rounded-full px-3 py-1 
+                               whitespace-nowrap hover:bg-gray-700 transition">
+                    💡 Dame una pista
+                </button>
+                <button @click="input = 'No entiendo el concepto, explícamelo de otra forma'; send()"
+                        class="text-xs bg-gray-800 text-blue-400 border 
+                               border-blue-500/30 rounded-full px-3 py-1 
+                               whitespace-nowrap hover:bg-gray-700 transition">
+                    🤔 No entiendo
+                </button>
+            </div>
+            
+            {{-- Input --}}
+            <div class="px-3 pb-3 flex gap-2">
+                <input x-model="input"
+                       @keydown.enter="send()"
+                       type="text"
+                       placeholder="Escribe tu pregunta..."
+                       class="flex-1 bg-gray-800 border border-gray-600 
+                              rounded-xl px-3 py-2 text-sm text-white 
+                              placeholder-gray-500 focus:outline-none 
+                              focus:border-blue-500 transition">
+                <button @click="send()"
+                        :disabled="loading"
+                        class="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 
+                               text-white rounded-xl px-3 py-2 transition">
+                    ➤
+                </button>
+            </div>
+        </div>
+
+        {{-- Floating button --}}
+        <button @click.stop="open = !open"
+                type="button"
+                class="w-14 h-14 bg-blue-600 hover:bg-blue-500 text-white 
+                       rounded-full shadow-lg flex items-center justify-center 
+                       text-2xl transition hover:scale-110 active:scale-95">
+            <span x-show="!open">🤖</span>
+            <span x-show="open" style="display:none">✕</span>
+        </button>
+    </div>
+
 </x-app-layout>

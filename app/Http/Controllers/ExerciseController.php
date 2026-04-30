@@ -22,7 +22,22 @@ class ExerciseController extends Controller
 
     public function submit(Request $request, Exercise $exercise)
     {
-        $raw = $request->input('code', '');
+        // Get code safely - never null
+        $raw = $request->input('code') 
+            ?? $request->input('submitted_code') 
+            ?? '';
+        $raw = is_string($raw) ? $raw : '';
+        
+        // If empty, return friendly error without saving to DB
+        if (trim($raw) === '') {
+            return response()->json([
+                'correct' => false,
+                'message' => '¡Escribe tu respuesta primero! Mira la estructura de referencia 👆',
+                'xp_earned' => 0,
+                'new_total_xp' => auth()->user()->xp
+            ]);
+        }
+
         $revealed = $request->boolean('revealed');
         
         // Normalize submitted code
@@ -50,7 +65,7 @@ class ExerciseController extends Controller
         UserExerciseAttempt::create([
             'user_id' => $user->id,
             'exercise_id' => $exercise->id,
-            'submitted_code' => $raw,
+            'submitted_code' => $raw ?: '(vacío)',
             'is_correct' => $isCorrect,
             'attempted_at' => now()
         ]);
@@ -87,8 +102,10 @@ class ExerciseController extends Controller
         ]);
     }
 
-    private function normalizeCode(string $code): string
+    private function normalizeCode(?string $code): string
     {
+        if ($code === null) return '';
+        
         // Remove placeholder comments
         $code = str_replace(
             ['// ESCRIBE TU CODIGO AQUI', '// Escribe tu código aquí...', '// Tu código aquí'],
