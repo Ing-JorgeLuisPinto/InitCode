@@ -21,6 +21,7 @@ class LessonController extends Controller
 
         $user = Auth::user();
         $alreadyCompleted = UserProgress::where(['user_id' => $user->id, 'lesson_id' => $lesson->id])->exists();
+        $newAchievements = [];
 
         if (!$alreadyCompleted && $lesson->type === 'reading') {
             UserProgress::create([
@@ -31,7 +32,7 @@ class LessonController extends Controller
             ]);
             $user->addXP($lesson->xp_reward);
             $user->updateStreak();
-            $user->checkAchievements();
+            $newAchievements = $user->checkAchievements();
             $alreadyCompleted = true;
         }
 
@@ -54,6 +55,6 @@ class LessonController extends Controller
             }
         }
 
-        return view('lessons.show', compact('lesson', 'exercise', 'alreadyCompleted', 'nextLesson'));
+        return view('lessons.show', compact('lesson', 'exercise', 'alreadyCompleted', 'nextLesson', 'newAchievements'));
     }
 }

@@ -807,7 +807,7 @@ class CourseSeeder extends Seeder
                 [
                     'title' => $data['title'],
                     'order' => $index + 1,
-                    'content' => $this->formatContent($data['explanation'], $data['analogy'], $data['stepByStep'], $data['exactCode'], $data['expectedResult'] ?? ''),
+                    'content' => $this->formatContent($data['explanation'], $data['analogy'], $data['stepByStep'] ?? 'Sigue las instrucciones.', $data['exactCode'] ?? '', $data['expectedResult'] ?? ''),
                     'xp_reward' => 10,
                     'type' => 'exercise',
                 ]
@@ -818,8 +818,164 @@ class CourseSeeder extends Seeder
             );
         }
 
-        // --- OTHER COURSES (4-7) would follow the same pattern ---
-        // For brevity, I'll stick to these 3 major ones fully updated to 15.
-        // If the user needs more, they can be added. 
+        // --- COURSE 8: SQL ---
+        $course8 = Course::updateOrCreate(
+            ['slug' => 'bases-de-datos-con-sql'],
+            [
+                'title' => 'Bases de Datos con SQL',
+                'description' => 'Aprende a guardar y organizar información de forma profesional.',
+                'icon' => '🗃️',
+                'order' => 8,
+                'level_id' => $aprendiz->id,
+            ]
+        );
+
+        $lessons8 = [
+            ['title' => '¿Qué es una base de datos?', 'explanation' => 'Una base de datos es un lugar organizado donde guardas información de forma estructurada para consultarla fácilmente.', 'analogy' => 'Es como una hoja de cálculo de Excel, pero mucho más potente y organizada.', 'starter_code' => "-- Escribe el comando para ver todas las tablas\n___", 'solution_code' => "SHOW TABLES;", 'expected_output' => "show tables;", 'xp_reward' => 10],
+            ['title' => 'Crear una tabla', 'explanation' => 'Una tabla en SQL organiza datos en filas y columnas, como una hoja de Excel con tipos de datos definidos.', 'starter_code' => "___ TABLE usuarios (\n  id INT PRIMARY KEY,\n  nombre VARCHAR(100)\n);", 'solution_code' => "CREATE TABLE usuarios (\n  id INT PRIMARY KEY,\n  nombre VARCHAR(100)\n);", 'expected_output' => "create table usuarios", 'xp_reward' => 15],
+            ['title' => 'INSERT — Agregar datos', 'explanation' => 'INSERT INTO agrega nuevas filas a una tabla.', 'analogy' => 'Es como agregar una fila nueva a tu hoja de cálculo.', 'starter_code' => "___ INTO usuarios (id, nombre) ___ (1, 'Ana');", 'solution_code' => "INSERT INTO usuarios (id, nombre) VALUES (1, 'Ana');", 'expected_output' => "insert into usuarios", 'xp_reward' => 15],
+            ['title' => 'SELECT — Consultar datos', 'explanation' => 'SELECT es el comando más usado en SQL. Sirve para consultar y ver los datos de una tabla.', 'starter_code' => "___ * FROM usuarios;", 'solution_code' => "SELECT * FROM usuarios;", 'expected_output' => "select * from usuarios;", 'xp_reward' => 20],
+            ['title' => 'WHERE — Filtrar resultados', 'explanation' => 'WHERE filtra los resultados de una consulta según una condición.', 'analogy' => 'Es como usar el filtro de Excel para ver solo las filas que cumplan una condición.', 'starter_code' => "SELECT * FROM usuarios\n___ nombre = 'Ana';", 'solution_code' => "SELECT * FROM usuarios\nWHERE nombre = 'Ana';", 'expected_output' => "select * from usuarios where nombre = 'ana';", 'xp_reward' => 20],
+            ['title' => 'UPDATE — Modificar datos', 'explanation' => 'UPDATE modifica registros existentes en una tabla.', 'starter_code' => "___ usuarios SET nombre = 'Carlos'\nWHERE id = 1;", 'solution_code' => "UPDATE usuarios SET nombre = 'Carlos'\nWHERE id = 1;", 'expected_output' => "update usuarios set nombre", 'xp_reward' => 25],
+            ['title' => 'DELETE — Eliminar datos', 'explanation' => 'DELETE elimina filas de una tabla. Siempre usa WHERE para no borrar todo.', 'analogy' => 'Como borrar una fila de Excel, pero sin deshacer posible.', 'starter_code' => "___ FROM usuarios WHERE id = 1;", 'solution_code' => "DELETE FROM usuarios WHERE id = 1;", 'expected_output' => "delete from usuarios", 'xp_reward' => 25],
+            ['title' => 'ORDER BY — Ordenar resultados', 'explanation' => 'ORDER BY ordena los resultados de una consulta de forma ascendente (ASC) o descendente (DESC).', 'starter_code' => "SELECT * FROM usuarios\nORDER BY nombre ___;", 'solution_code' => "SELECT * FROM usuarios\nORDER BY nombre ASC;", 'expected_output' => "select * from usuarios order by nombre asc;", 'xp_reward' => 25],
+            ['title' => 'LIMIT — Limitar resultados', 'explanation' => 'LIMIT controla cuántas filas devuelve una consulta. Muy útil para paginación.', 'starter_code' => "SELECT * FROM usuarios\nORDER BY id DESC\n___ 5;", 'solution_code' => "SELECT * FROM usuarios\nORDER BY id DESC\nLIMIT 5;", 'expected_output' => "select * from usuarios order by id desc limit 5;", 'xp_reward' => 25],
+            ['title' => 'COUNT — Contar registros', 'explanation' => 'COUNT() cuenta cuántas filas hay en una consulta.', 'starter_code' => "SELECT ___(id) FROM usuarios;", 'solution_code' => "SELECT COUNT(id) FROM usuarios;", 'expected_output' => "select count(id) from usuarios;", 'xp_reward' => 30],
+            ['title' => 'JOIN — Unir tablas', 'explanation' => 'JOIN une dos tablas relacionadas en una sola consulta.', 'analogy' => 'Como buscar el nombre del cliente en la tabla clientes mientras ves sus pedidos en la tabla pedidos.', 'starter_code' => "SELECT u.nombre, p.producto\nFROM usuarios u\n___ JOIN pedidos p ON u.id = p.usuario_id;", 'solution_code' => "SELECT u.nombre, p.producto\nFROM usuarios u\nINNER JOIN pedidos p ON u.id = p.usuario_id;", 'expected_output' => "inner join pedidos p on u.id = p.usuario_id;", 'xp_reward' => 35],
+            ['title' => 'GROUP BY — Agrupar datos', 'explanation' => 'GROUP BY agrupa filas con el mismo valor para hacer cálculos por grupo.', 'starter_code' => "SELECT ciudad, COUNT(*) as total\nFROM usuarios\n___ BY ciudad;", 'solution_code' => "SELECT ciudad, COUNT(*) as total\nFROM usuarios\nGROUP BY ciudad;", 'expected_output' => "group by ciudad;", 'xp_reward' => 35],
+            ['title' => 'LIKE — Buscar patrones', 'explanation' => 'LIKE busca texto que coincida con un patrón. % significa cualquier cantidad de caracteres.', 'starter_code' => "SELECT * FROM usuarios\nWHERE nombre ___ 'A%';", 'solution_code' => "SELECT * FROM usuarios\nWHERE nombre LIKE 'A%';", 'expected_output' => "where nombre like 'a%';", 'xp_reward' => 30],
+            ['title' => 'Claves foráneas', 'explanation' => 'Una clave foránea (FOREIGN KEY) conecta dos tablas relacionadas para mantener integridad de datos.', 'starter_code' => "CREATE TABLE pedidos (\n  id INT PRIMARY KEY,\n  usuario_id INT,\n  ___ KEY (usuario_id) REFERENCES usuarios(id)\n);", 'solution_code' => "CREATE TABLE pedidos (\n  id INT PRIMARY KEY,\n  usuario_id INT,\n  FOREIGN KEY (usuario_id) REFERENCES usuarios(id)\n);", 'expected_output' => "foreign key (usuario_id) references usuarios(id)", 'xp_reward' => 40],
+            ['title' => 'Proyecto final SQL', 'explanation' => 'Combina SELECT, JOIN, WHERE y ORDER BY para hacer una consulta completa real.', 'starter_code' => "SELECT u.nombre, COUNT(p.id) as total_pedidos\nFROM usuarios u\nLEFT ___ pedidos p ON u.id = p.usuario_id\nGROUP BY u.nombre\nORDER BY total_pedidos ___;", 'solution_code' => "SELECT u.nombre, COUNT(p.id) as total_pedidos\nFROM usuarios u\nLEFT JOIN pedidos p ON u.id = p.usuario_id\nGROUP BY u.nombre\nORDER BY total_pedidos DESC;", 'expected_output' => "left join pedidos p on u.id = p.usuario_id", 'xp_reward' => 50],
+        ];
+
+        foreach ($lessons8 as $index => $data) {
+            $lesson = Lesson::updateOrCreate(
+                ['course_id' => $course8->id, 'slug' => Str::slug($data['title'])],
+                [
+                    'title' => $data['title'],
+                    'order' => $index + 1,
+                    'content' => $this->formatContent($data['explanation'], $data['analogy'] ?? 'Piénsalo como organizar datos.', 'Sigue las instrucciones.', $data['solution_code'], $data['expected_output']),
+                    'xp_reward' => 10,
+                    'type' => 'exercise',
+                ]
+            );
+            Exercise::updateOrCreate(
+                ['lesson_id' => $lesson->id],
+                [
+                    'instructions' => $data['explanation'],
+                    'starter_code' => $data['starter_code'],
+                    'solution_code' => $data['solution_code'],
+                    'expected_output' => $data['expected_output'],
+                    'xp_reward' => $data['xp_reward']
+                ]
+            );
+        }
+
+        // --- COURSE 9: React ---
+        $intermedio = Level::where('slug', 'intermedio')->first();
+        $course9 = Course::updateOrCreate(
+            ['slug' => 'react-para-principiantes'],
+            [
+                'title' => 'React para Principiantes',
+                'description' => 'Construye interfaces modernas con la librería más popular.',
+                'icon' => '⚛️',
+                'order' => 9,
+                'level_id' => $intermedio->id,
+            ]
+        );
+
+        $lessons9 = [
+            ['title' => '¿Qué es React?', 'explanation' => 'React es una librería de JavaScript para construir interfaces de usuario con componentes reutilizables.', 'analogy' => 'Es como tener piezas de LEGO para construir páginas web. Cada pieza es un componente que puedes reusar.', 'starter_code' => "import ___ from 'react';\nfunction App() {\n  return <h1>Hola React</h1>;\n}", 'solution_code' => "import React from 'react';\nfunction App() {\n  return <h1>Hola React</h1>;\n}", 'expected_output' => "import react from 'react';", 'xp_reward' => 15],
+            ['title' => 'Componentes', 'explanation' => 'Un componente es una función que devuelve HTML. Es la unidad básica de React.', 'starter_code' => "function ___() {\n  return <div>Mi primer componente</div>;\n}\nexport default Tarjeta;", 'solution_code' => "function Tarjeta() {\n  return <div>Mi primer componente</div>;\n}\nexport default Tarjeta;", 'expected_output' => "function tarjeta()", 'xp_reward' => 15],
+            ['title' => 'JSX', 'explanation' => 'JSX es la sintaxis especial de React que mezcla JavaScript con HTML. Se parece al HTML pero tiene diferencias.', 'starter_code' => "function App() {\n  const nombre = 'Ana';\n  return <h1>Hola, {___}</h1>;\n}", 'solution_code' => "function App() {\n  const nombre = 'Ana';\n  return <h1>Hola, {nombre}</h1>;\n}", 'expected_output' => "return <h1>hola, {nombre}</h1>;", 'xp_reward' => 20],
+            ['title' => 'Props', 'explanation' => 'Las props son como parámetros que le pasas a un componente para personalizarlo.', 'analogy' => 'Como pasar ingredientes a una receta — la receta es el componente y los ingredientes son las props.', 'starter_code' => "function Saludo({ ___ }) {\n  return <h1>Hola, {nombre}</h1>;\n}\n<Saludo nombre='Ana' />", 'solution_code' => "function Saludo({ nombre }) {\n  return <h1>Hola, {nombre}</h1>;\n}\n<Saludo nombre='Ana' />", 'expected_output' => "function saludo({ nombre })", 'xp_reward' => 25],
+            ['title' => 'useState', 'explanation' => 'useState es un hook que permite a un componente recordar información que puede cambiar.', 'analogy' => 'Es como una variable que cuando cambia, React actualiza automáticamente la pantalla.', 'starter_code' => "import { ___ } from 'react';\nfunction Contador() {\n  const [cuenta, setCuenta] = useState(0);\n  return <button onClick={() => setCuenta(cuenta + 1)}>{cuenta}</button>;\n}", 'solution_code' => "import { useState } from 'react';\nfunction Contador() {\n  const [cuenta, setCuenta] = useState(0);\n  return <button onClick={() => setCuenta(cuenta + 1)}>{cuenta}</button>;\n}", 'expected_output' => "import { usestate } from 'react';", 'xp_reward' => 30],
+            ['title' => 'useEffect', 'explanation' => 'useEffect ejecuta código cuando el componente se monta o cuando cambia algo. Útil para cargar datos.', 'starter_code' => "import { useState, ___ } from 'react';\nuseEffect(() => {\n  console.log('Componente montado');\n}, []);", 'solution_code' => "import { useState, useEffect } from 'react';\nuseEffect(() => {\n  console.log('Componente montado');\n}, []);", 'expected_output' => "import { usestate, useeffect } from 'react';", 'xp_reward' => 35],
+            ['title' => 'Listas en React', 'explanation' => 'Para mostrar listas en React usas el método .map() del array.', 'starter_code' => "const frutas = ['🍎', '🍊', '🍇'];\nreturn (\n  <ul>\n    {frutas.___(fruta => <li key={fruta}>{fruta}</li>)}\n  </ul>\n);", 'solution_code' => "const frutas = ['🍎', '🍊', '🍇'];\nreturn (\n  <ul>\n    {frutas.map(fruta => <li key={fruta}>{fruta}</li>)}\n  </ul>\n);", 'expected_output' => "frutas.map(fruta =>", 'xp_reward' => 30],
+            ['title' => 'Eventos', 'explanation' => 'Los eventos en React se escriben en camelCase: onClick, onChange, onSubmit.', 'starter_code' => "function Boton() {\n  function handleClick() {\n    alert('¡Hiciste clic!');\n  }\n  return <button ___={handleClick}>Clic aquí</button>;\n}", 'solution_code' => "function Boton() {\n  function handleClick() {\n    alert('¡Hiciste clic!');\n  }\n  return <button onClick={handleClick}>Clic aquí</button>;\n}", 'expected_output' => "return <button onclick={handleclick}>clic aquí</button>;", 'xp_reward' => 30],
+            ['title' => 'Formularios en React', 'explanation' => 'En React los formularios usan estado controlado — el valor del input se guarda en useState.', 'starter_code' => "const [nombre, setNombre] = useState('');\nreturn (\n  <input \n    value={nombre}\n    ___={(e) => setNombre(e.target.value)}\n  />\n);", 'solution_code' => "const [nombre, setNombre] = useState('');\nreturn (\n  <input \n    value={nombre}\n    onChange={(e) => setNombre(e.target.value)}\n  />\n);", 'expected_output' => "onchange={(e) => setnombre(e.target.value)}", 'xp_reward' => 35],
+            ['title' => 'Condicionales en JSX', 'explanation' => 'Puedes mostrar elementos condicionalmente usando el operador ternario o &&.', 'starter_code' => "const logueado = true;\nreturn (\n  <div>\n    {logueado ___ <p>Bienvenido</p> : <p>Inicia sesión</p>}\n  </div>\n);", 'solution_code' => "const logueado = true;\nreturn (\n  <div>\n    {logueado ? <p>Bienvenido</p> : <p>Inicia sesión</p>}\n  </div>\n);", 'expected_output' => "{logueado ? <p>bienvenido</p> : <p>inicia sesión</p>}", 'xp_reward' => 30],
+            ['title' => 'Componentes hijo', 'explanation' => 'Los componentes pueden contener otros componentes — esto crea una jerarquía de componentes.', 'starter_code' => "function Tarjeta({ titulo, contenido }) {\n  return (\n    <div>\n      <___ texto={titulo} />\n      <p>{contenido}</p>\n    </div>\n  );\n}\nfunction Titulo({ texto }) {\n  return <h2>{texto}</h2>;\n}", 'solution_code' => "function Tarjeta({ titulo, contenido }) {\n  return (\n    <div>\n      <Titulo texto={titulo} />\n      <p>{contenido}</p>\n    </div>\n  );\n}\nfunction Titulo({ texto }) {\n  return <h2>{texto}</h2>;\n}", 'expected_output' => "<titulo texto={titulo} />", 'xp_reward' => 35],
+            ['title' => 'Context API', 'explanation' => 'Context API permite compartir datos entre componentes sin pasar props manualmente por cada nivel.', 'starter_code' => "const TemaContext = React.___({});\nfunction App() {\n  return (\n    <TemaContext.Provider value={{ color: 'azul' }}>\n      <Hijo />\n    </TemaContext.Provider>\n  );\n}", 'solution_code' => "const TemaContext = React.createContext({});\nfunction App() {\n  return (\n    <TemaContext.Provider value={{ color: 'azul' }}>\n      <Hijo />\n    </TemaContext.Provider>\n  );\n}", 'expected_output' => "react.createcontext({})", 'xp_reward' => 40],
+            ['title' => 'React Router básico', 'explanation' => 'React Router permite navegar entre páginas sin recargar el navegador.', 'starter_code' => "import { BrowserRouter, ___, Route } from 'react-router-dom';\n<BrowserRouter>\n  <Routes>\n    <Route path='/' element={<Inicio />} />\n  </Routes>\n</BrowserRouter>", 'solution_code' => "import { BrowserRouter, Routes, Route } from 'react-router-dom';\n<BrowserRouter>\n  <Routes>\n    <Route path='/' element={<Inicio />} />\n  </Routes>\n</BrowserRouter>", 'expected_output' => "import { browserrouter, routes, route } from 'react-router-dom';", 'xp_reward' => 40],
+            ['title' => 'Fetch con useEffect', 'explanation' => 'Combina useEffect y fetch para cargar datos de una API cuando el componente se monta.', 'starter_code' => "useEffect(() => {\n  ___(\"https://api.example.com/datos\")\n    .then(r => r.json())\n    .then(data => setDatos(data));\n}, []);", 'solution_code' => "useEffect(() => {\n  fetch(\"https://api.example.com/datos\")\n    .then(r => r.json())\n    .then(data => setDatos(data));\n}, []);", 'expected_output' => "fetch(\"https://api.example.com/datos\")", 'xp_reward' => 40],
+            ['title' => 'Proyecto final React', 'explanation' => 'Crea un componente completo con estado, props, lista y eventos.', 'starter_code' => "function ListaTareas() {\n  const [tareas, setTareas] = ___([]); \n  const [nueva, setNueva] = useState('');\n  function agregar() {\n    setTareas([...tareas, nueva]);\n    setNueva('');\n  }\n  return (\n    <div>\n      <input value={nueva} onChange={e => setNueva(e.target.value)} />\n      <button onClick={agregar}>Agregar</button>\n      <ul>{tareas.map((t, i) => <li key={i}>{t}</li>)}</ul>\n    </div>\n  );\n}", 'solution_code' => "function ListaTareas() {\n  const [tareas, setTareas] = useState([]);\n  const [nueva, setNueva] = useState('');\n  function agregar() {\n    setTareas([...tareas, nueva]);\n    setNueva('');\n  }\n  return (\n    <div>\n      <input value={nueva} onChange={e => setNueva(e.target.value)} />\n      <button onClick={agregar}>Agregar</button>\n      <ul>{tareas.map((t, i) => <li key={i}>{t}</li>)}</ul>\n    </div>\n  );\n}", 'expected_output' => "const [tareas, settareas] = usestate([]);", 'xp_reward' => 50],
+        ];
+
+        foreach ($lessons9 as $index => $data) {
+            $lesson = Lesson::updateOrCreate(
+                ['course_id' => $course9->id, 'slug' => Str::slug($data['title'])],
+                [
+                    'title' => $data['title'],
+                    'order' => $index + 1,
+                    'content' => $this->formatContent($data['explanation'], $data['analogy'] ?? 'Piénsalo como bloques de construcción.', 'Sigue las instrucciones.', $data['solution_code'], $data['expected_output']),
+                    'xp_reward' => 10,
+                    'type' => 'exercise',
+                ]
+            );
+            Exercise::updateOrCreate(
+                ['lesson_id' => $lesson->id],
+                [
+                    'instructions' => $data['explanation'],
+                    'starter_code' => $data['starter_code'],
+                    'solution_code' => $data['solution_code'],
+                    'expected_output' => $data['expected_output'],
+                    'xp_reward' => $data['xp_reward']
+                ]
+            );
+        }
+
+        // --- COURSE 10: Security ---
+        $course10 = Course::updateOrCreate(
+            ['slug' => 'seguridad-web-basica'],
+            [
+                'title' => 'Seguridad Web Básica',
+                'description' => 'Aprende a proteger tus aplicaciones de los ataques más comunes.',
+                'icon' => '🔐',
+                'order' => 10,
+                'level_id' => $intermedio->id,
+            ]
+        );
+
+        $lessons10 = [
+            ['title' => '¿Qué es la seguridad web?', 'explanation' => 'La seguridad web protege aplicaciones y usuarios de ataques maliciosos.', 'analogy' => 'Es como poner cerraduras, alarmas y cámaras en tu casa digital.', 'starter_code' => "// ¿Cuál es la práctica MÁS importante en seguridad web?\n// Escribe: validar_entradas", 'solution_code' => "// validar_entradas", 'expected_output' => "// validar_entradas", 'xp_reward' => 10],
+            ['title' => 'SQL Injection', 'explanation' => 'SQL Injection ocurre cuando un atacante inyecta código SQL malicioso en un formulario para manipular la base de datos.', 'analogy' => 'Como cuando alguien escribe en un formulario de nombre: \' OR \'1\'=\'1 para engañar al sistema.', 'starter_code' => "// ¿Cómo se previene SQL Injection en Laravel?\n// Escribe: prepared_statements", 'solution_code' => "// prepared_statements", 'expected_output' => "// prepared_statements", 'xp_reward' => 20],
+            ['title' => 'XSS - Cross Site Scripting', 'explanation' => 'XSS ocurre cuando un atacante inyecta JavaScript malicioso en una página web que otros usuarios visitan.', 'starter_code' => "// En Blade, ¿qué símbolo escapa automáticamente el HTML?\n// Escribe: {{ doble_llave }}", 'solution_code' => "// {{ doble_llave }}", 'expected_output' => "// {{ doble_llave }}", 'xp_reward' => 20],
+            ['title' => 'CSRF Protection', 'explanation' => 'CSRF (Cross-Site Request Forgery) es un ataque donde un sitio malicioso hace peticiones en nombre del usuario. Laravel lo previene con tokens.', 'starter_code' => "<!-- ¿Qué directiva Blade agrega protección CSRF a los formularios? -->\n<form method='POST'>\n  @___\n</form>", 'solution_code' => "<!-- csrf -->\n<form method='POST'>\n  @csrf\n</form>", 'expected_output' => "@csrf", 'xp_reward' => 25],
+            ['title' => 'Contraseñas seguras', 'explanation' => 'Las contraseñas nunca deben guardarse en texto plano. Siempre deben encriptarse con hashing.', 'starter_code' => "// En Laravel, ¿qué facade se usa para encriptar contraseñas?\n// Escribe: Hash::make", 'solution_code' => "// Hash::make", 'expected_output' => "// hash::make", 'xp_reward' => 20],
+            ['title' => 'HTTPS', 'explanation' => 'HTTPS encripta la comunicación entre el navegador y el servidor. Sin HTTPS, los datos viajan en texto plano y pueden ser interceptados.', 'starter_code' => "// ¿Qué protocolo seguro deben usar los sitios web?\n// Escribe: https", 'solution_code' => "// https", 'expected_output' => "// https", 'xp_reward' => 15],
+            ['title' => 'Autenticación vs Autorización', 'explanation' => 'Autenticación verifica QUIÉN eres. Autorización verifica QUÉ puedes hacer.', 'analogy' => 'Autenticación es mostrar tu cédula para entrar al edificio. Autorización es qué pisos puedes visitar.', 'starter_code' => "// En Laravel, ¿qué middleware verifica si el usuario está autenticado?\n// Escribe: auth", 'solution_code' => "// auth", 'expected_output' => "// auth", 'xp_reward' => 20],
+            ['title' => 'Validación de entrada', 'explanation' => 'Siempre valida los datos que envían los usuarios antes de procesarlos o guardarlos en la BD.', 'starter_code' => '$request->' . "___([\n  'email' => 'required|email',\n  'password' => 'required|min:8'\n]);", 'solution_code' => '$request->' . "validate([\n  'email' => 'required|email',\n  'password' => 'required|min:8'\n]);", 'expected_output' => '$request->' . "validate([", 'xp_reward' => 25],
+            ['title' => 'Headers de seguridad', 'explanation' => 'Los headers HTTP de seguridad protegen contra ataques comunes. X-Frame-Options previene clickjacking.', 'starter_code' => "// ¿Qué header previene que tu sitio sea embebido en un iframe?\n// Escribe: X-Frame-Options", 'solution_code' => "// X-Frame-Options", 'expected_output' => "// x-frame-options", 'xp_reward' => 25],
+            ['title' => 'Rate Limiting', 'explanation' => 'Rate limiting limita cuántas peticiones puede hacer un usuario en un tiempo determinado. Previene ataques de fuerza bruta.', 'starter_code' => "// En Laravel routes, ¿qué middleware limita las peticiones?\n// Escribe: throttle", 'solution_code' => "// throttle", 'expected_output' => "// throttle", 'xp_reward' => 25],
+            ['title' => 'Principio de mínimo privilegio', 'explanation' => 'Cada usuario y proceso debe tener solo los permisos mínimos necesarios para hacer su trabajo.', 'analogy' => 'Un cajero de banco puede ver saldos de clientes pero no puede cambiarlos sin autorización adicional.', 'starter_code' => "// ¿Qué principio de seguridad dice que los usuarios deben tener solo los permisos necesarios?\n// Escribe: minimo_privilegio", 'solution_code' => "// minimo_privilegio", 'expected_output' => "// minimo_privilegio", 'xp_reward' => 20],
+            ['title' => 'Logs y monitoreo', 'explanation' => 'Registrar actividad sospechosa te permite detectar y responder a ataques. Laravel tiene un sistema de logs integrado.', 'starter_code' => "// ¿Qué facade de Laravel se usa para registrar eventos de seguridad?\n// Escribe: Log::warning", 'solution_code' => "// Log::warning", 'expected_output' => "// log::warning", 'xp_reward' => 25],
+            ['title' => 'Variables de entorno', 'explanation' => 'Las credenciales y claves secretas NUNCA deben estar en el código. Siempre en variables de entorno (.env).', 'starter_code' => "// ¿En qué archivo de Laravel se guardan las claves secretas?\n// Escribe: .env", 'solution_code' => "// .env", 'expected_output' => "// .env", 'xp_reward' => 20],
+            ['title' => 'Backups', 'explanation' => 'Los backups regulares son esenciales para recuperarse de ataques como ransomware o pérdida de datos.', 'starter_code' => "// ¿Cada cuánto se recomienda hacer backup en una app de producción?\n// Escribe: diario", 'solution_code' => "// diario", 'expected_output' => "// diario", 'xp_reward' => 20],
+            ['title' => 'Checklist de seguridad', 'explanation' => 'Una aplicación segura combina: HTTPS, validación, hashing, CSRF, logs, backups y mínimo privilegio.', 'starter_code' => "// ¿Cuántos principios de seguridad mencionados debes aplicar?\n// Escribe: todos", 'solution_code' => "// todos", 'expected_output' => "// todos", 'xp_reward' => 30],
+        ];
+
+        foreach ($lessons10 as $index => $data) {
+            $lesson = Lesson::updateOrCreate(
+                ['course_id' => $course10->id, 'slug' => Str::slug($data['title'])],
+                [
+                    'title' => $data['title'],
+                    'order' => $index + 1,
+                    'content' => $this->formatContent($data['explanation'], $data['analogy'] ?? 'Protege tu casa digital.', 'Sigue las instrucciones.', $data['solution_code'], $data['expected_output']),
+                    'xp_reward' => 10,
+                    'type' => 'exercise',
+                ]
+            );
+            Exercise::updateOrCreate(
+                ['lesson_id' => $lesson->id],
+                [
+                    'instructions' => $data['explanation'],
+                    'starter_code' => $data['starter_code'],
+                    'solution_code' => $data['solution_code'],
+                    'expected_output' => $data['expected_output'],
+                    'xp_reward' => $data['xp_reward']
+                ]
+            );
+        }
     }
 }

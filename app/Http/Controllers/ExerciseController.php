@@ -71,6 +71,7 @@ class ExerciseController extends Controller
         ]);
         
         $xpEarned = 0;
+        $newAchievements = [];
         if ($isCorrect) {
             $alreadySolved = UserExerciseAttempt::where([
                 'user_id' => $user->id,
@@ -82,7 +83,7 @@ class ExerciseController extends Controller
                 $xpEarned = $revealed ? 5 : $exercise->xp_reward;
                 $user->addXP($xpEarned);
                 $user->updateStreak();
-                $user->checkAchievements();
+                $newAchievements = $user->checkAchievements();
                 
                 $lesson = $exercise->lesson;
                 UserProgress::firstOrCreate(
@@ -98,7 +99,8 @@ class ExerciseController extends Controller
                 ? '¡Correcto! Muy bien hecho 🎉' 
                 : '¡Casi! Recuerda que la respuesta esperada es: ' . $exercise->expected_output . ' 💪',
             'xp_earned' => $xpEarned,
-            'new_total_xp' => $user->fresh()->xp
+            'new_total_xp' => $user->fresh()->xp,
+            'new_achievements' => $newAchievements
         ]);
     }
 

@@ -129,10 +129,11 @@ class User extends Authenticatable
         $this->save();
     }
 
-    public function checkAchievements(): void
+    public function checkAchievements(): array
     {
         $achievements = Achievement::all();
         $earnedIds = $this->userAchievements()->pluck('achievement_id')->toArray();
+        $newAchievements = [];
 
         foreach ($achievements as $achievement) {
             if (in_array($achievement->id, $earnedIds)) {
@@ -154,8 +155,6 @@ class User extends Authenticatable
                         ->count() >= $achievement->condition_value;
                     break;
                 case 'first_try_correct':
-                    // Check if there's any exercise where the first attempt was correct
-                    // This is a bit simplified for now
                     $conditionMet = $this->userExerciseAttempts()->where('is_correct', true)->count() >= $achievement->condition_value;
                     break;
             }
@@ -166,7 +165,9 @@ class User extends Authenticatable
                     'achievement_id' => $achievement->id,
                     'earned_at' => now(),
                 ]);
+                $newAchievements[] = $achievement;
             }
         }
+        return $newAchievements;
     }
 }
