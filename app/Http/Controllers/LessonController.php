@@ -37,6 +37,23 @@ class LessonController extends Controller
 
         $exercise = $lesson->exercises->first();
 
-        return view('lessons.show', compact('lesson', 'exercise', 'alreadyCompleted'));
+        // Find next lesson
+        $nextLesson = Lesson::where('course_id', $lesson->course_id)
+            ->where('order', '>', $lesson->order)
+            ->orderBy('order', 'asc')
+            ->first();
+
+        if (!$nextLesson) {
+            $nextCourse = Course::where('order', '>', $lesson->course->order)
+                ->orderBy('order', 'asc')
+                ->first();
+            if ($nextCourse) {
+                $nextLesson = Lesson::where('course_id', $nextCourse->id)
+                    ->orderBy('order', 'asc')
+                    ->first();
+            }
+        }
+
+        return view('lessons.show', compact('lesson', 'exercise', 'alreadyCompleted', 'nextLesson'));
     }
 }

@@ -1,5 +1,11 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto space-y-12">
+        <a href="{{ route('courses.index') }}" 
+           class="inline-flex items-center gap-2 text-gray-400 hover:text-white 
+                  transition mb-6 group">
+            ← Volver a cursos
+        </a>
+
         <!-- Hero Section -->
         <header class="relative overflow-hidden bg-surface-container border border-outline-variant rounded-3xl p-12 flex flex-col md:flex-row gap-12 items-center">
             <div class="absolute -right-20 -top-20 w-80 h-80 bg-primary/10 blur-[120px] rounded-full"></div>
