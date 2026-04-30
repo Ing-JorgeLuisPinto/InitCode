@@ -81,10 +81,10 @@
             </div>
 
             {{-- Show answer section (Alpine.js) --}}
-            <div x-data="{ attempts: 0, revealed: false, confirmReveal: false }" 
+            <div x-data="{ attempts: 0, revealed: false, confirmReveal: false, correct: false }" 
                  class="px-4 pb-3">
 
-                <div x-show="attempts > 0 && !revealed">
+                <div x-show="attempts > 0 && !revealed && !correct">
                     <div x-show="!confirmReveal">
                         <button @click.prevent="confirmReveal = true"
                                 type="button"
@@ -371,6 +371,13 @@
                     var panel = document.getElementById('result-panel');
 
                     if (data.correct) {
+                        // If correct, immediately hide the show-answer button
+                        try {
+                            var el = document.querySelector('[x-data]');
+                            if (el && el.__x) el.__x.$data.correct = true;
+                            else if (el && el._x_dataStack) el._x_dataStack[0].correct = true;
+                        } catch(err) {}
+
                         panel.innerHTML =
                             '<div class="p-4 bg-green-500/20 border border-green-500/30 rounded-lg mt-3">' +
                             '<p class="text-green-400 font-bold">✅ ¡Correcto! +' + data.xp_earned + ' XP 🎉</p>' +
