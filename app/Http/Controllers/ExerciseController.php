@@ -17,15 +17,28 @@ class ExerciseController extends Controller
 
     public function submit(Request $request, Exercise $exercise)
     {
-        $submitted = trim($request->input('code'));
-        $expected = trim($exercise->expected_output);
-        $isCorrect = ($submitted === $expected);
+        $submittedRaw = $request->input('code');
+        
+        // Normalize strings: trim, lower, remove extra spaces, normalize line breaks
+        $normalize = function($str) {
+            $str = str_replace(["\r\n", "\r"], "\n", $str); // Normalize line breaks
+            $str = preg_replace('/\s+/', ' ', $str);        // Remove extra spaces/tabs/newlines
+            return strtolower(trim($str));
+        };
+
+        $submitted = $normalize($submittedRaw);
+        $expected = $normalize($exercise->expected_output);
+
+        $isCorrect = ($submitted === $expected) || 
+                     str_contains($submitted, $expected) || 
+                     ($expected !== '' && str_contains($expected, $submitted));
+
         $user = Auth::user();
 
         UserExerciseAttempt::create([
             'user_id' => $user->id,
             'exercise_id' => $exercise->id,
-            'submitted_code' => $submitted,
+            'submitted_code' => $submittedRaw,
             'is_correct' => $isCorrect,
             'attempted_at' => now()
         ]);
@@ -36,7 +49,7 @@ class ExerciseController extends Controller
                 'user_id' => $user->id,
                 'exercise_id' => $exercise->id,
                 'is_correct' => true
-            ])->count() === 1; // It was just created, so if count is 1, it's the first time
+            ])->count() === 1;
 
             if ($alreadySolved) {
                 $xpEarned = $exercise->xp_reward;
@@ -54,7 +67,9 @@ class ExerciseController extends Controller
 
         return response()->json([
             'correct' => $isCorrect,
-            'message' => $isCorrect ? '¡Correcto! Muy bien hecho 🎉' : 'Casi, inténtalo de nuevo. Revisa la sintaxis 💪',
+            'message' => $isCorrect 
+                ? '¡Correcto! Muy bien hecho 🎉' 
+                : '¡Casi! Recuerda que la respuesta esperada es: ' . $exercise->expected_output . ' 💪 Cópiala exactamente si no encuentras el error.',
             'xp_earned' => $xpEarned,
             'new_total_xp' => $user->fresh()->xp
         ]);

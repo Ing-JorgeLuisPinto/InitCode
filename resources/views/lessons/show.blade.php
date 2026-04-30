@@ -31,11 +31,9 @@
         <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
             <!-- Instructions Panel -->
             <div class="bg-surface-container border border-outline-variant rounded-2xl p-8 flex flex-col gap-6 overflow-y-auto">
-                <div class="prose prose-invert max-w-none">
-                    <h3 class="text-xl font-bold text-on-surface">Instrucciones</h3>
-                    <div class="text-on-surface-variant leading-relaxed">
-                        {!! nl2br(e($lesson->content)) !!}
-                    </div>
+                <!-- Rich Lesson Content -->
+                <div class="lesson-rich-content">
+                    {!! $lesson->content !!}
                 </div>
 
                 @if($exercise)

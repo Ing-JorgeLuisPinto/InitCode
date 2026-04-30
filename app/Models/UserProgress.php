@@ -20,4 +20,9 @@ class UserProgress extends Model
     {
         return $this->belongsTo(Lesson::class);
     }
+
+    protected $casts = [
+        'completed_at' => 'datetime',
+        'xp_earned' => 'integer',
+    ];
 }

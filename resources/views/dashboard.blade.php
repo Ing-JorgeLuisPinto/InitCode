@@ -119,7 +119,7 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-bold truncate">{{ $progress->lesson->title }}</p>
-                                <p class="text-xs text-slate-500">{{ $progress->completed_at->diffForHumans() }}</p>
+                                <p class="text-xs text-slate-500">{{ $progress->completed_at ? \Carbon\Carbon::parse($progress->completed_at)->diffForHumans() : 'Recientemente' }}</p>
                             </div>
                             <div class="bg-primary/20 text-primary px-2 py-1 rounded text-[10px] font-bold">
                                 +{{ $progress->xp_earned }} XP
