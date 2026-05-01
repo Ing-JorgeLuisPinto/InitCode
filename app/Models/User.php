@@ -30,6 +30,7 @@ class User extends Authenticatable
         'streak_days',
         'last_activity_date',
         'is_premium',
+        'is_admin',
     ];
 
     /**
@@ -56,6 +57,7 @@ class User extends Authenticatable
             'xp' => 'integer',
             'streak_days' => 'integer',
             'is_premium' => 'boolean',
+            'is_admin' => 'boolean',
         ];
     }
 

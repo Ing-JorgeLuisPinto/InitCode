@@ -137,6 +137,10 @@
             <x-nav-link :href="route('tutor.index')" :active="request()->routeIs('tutor.*')" icon="smart_toy">Tutor IA</x-nav-link>
             <x-nav-link :href="route('leaderboard.index')" :active="request()->routeIs('leaderboard.index')" icon="emoji_events">Clasificación</x-nav-link>
             <x-nav-link :href="route('profile.show')" :active="request()->routeIs('profile.*')" icon="person">Perfil</x-nav-link>
+            
+            @if(Auth::user()->is_admin)
+            <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')" icon="settings">⚙️ Admin Panel</x-nav-link>
+            @endif
         </nav>
         <div class="p-6 border-t border-[#1F2937] mt-auto">
             <form method="POST" action="{{ route('logout') }}">
