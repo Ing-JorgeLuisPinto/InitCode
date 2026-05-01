@@ -193,131 +193,7 @@
 
     </div>{{-- end flex --}}
 
-    {{-- Floating CodeBot --}}
-    <div id="lesson-codebot"
-         x-data="{
-             open: false,
-             messages: [{ role: 'bot', text: '¡Hola! Soy CodeBot 🤖 Estoy aquí para ayudarte con esta lección. ¿En qué te puedo ayudar?' }],
-             input: '',
-             loading: false,
-             async send() {
-                 if (!this.input.trim() || this.loading) return;
-                 const msg = this.input.trim();
-                 this.messages.push({ role: 'user', text: msg });
-                 this.input = '';
-                 this.loading = true;
-                 try {
-                     const res = await fetch('{{ route('lesson.chat') }}', {
-                         method: 'POST',
-                         headers: {
-                             'Content-Type': 'application/json',
-                             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
-                         },
-                         body: JSON.stringify({
-                             message: msg,
-                             lesson_title: '{{ addslashes($lesson->title) }}',
-                             exercise_instructions: '{{ $exercise ? addslashes($exercise->instructions) : '' }}'
-                         })
-                     });
-                     const data = await res.json();
-                     this.messages.push({ role: 'bot', text: data.message });
-                 } catch(e) {
-                     this.messages.push({ role: 'bot', text: 'Error de conexión. 😅' });
-                 }
-                 this.loading = false;
-                 this.$nextTick(() => {
-                     const el = document.getElementById('chat-messages');
-                     if (el) el.scrollTop = el.scrollHeight;
-                 });
-             }
-         }"
-         class="fixed bottom-6 left-6 z-40">
 
-        {{-- Chat panel --}}
-        <div x-show="open"
-             x-transition
-             class="mb-4 w-80 bg-gray-900 border border-gray-700 
-                    rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-             style="height:400px; display:none;">
-
-            <div class="flex items-center justify-between px-4 py-3 bg-blue-600">
-                <div class="flex items-center gap-2 text-white">
-                    <span>🤖</span>
-                    <div>
-                        <p class="font-semibold text-sm">CodeBot</p>
-                        <p class="text-xs text-blue-200">Te ayuda sin darte las respuestas</p>
-                    </div>
-                </div>
-                <button @click.stop="open = false" type="button"
-                        class="text-blue-200 hover:text-white text-lg leading-none">
-                    ✕
-                </button>
-            </div>
-
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-3 space-y-3">
-                <template x-for="(msg, i) in messages" :key="i">
-                    <div :class="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
-                        <div :class="msg.role === 'user'
-                                ? 'bg-blue-600 text-white rounded-2xl rounded-tr-sm px-3 py-2 max-w-xs text-sm'
-                                : 'bg-gray-800 text-gray-200 rounded-2xl rounded-tl-sm px-3 py-2 max-w-xs text-sm'"
-                             x-text="msg.text">
-                        </div>
-                    </div>
-                </template>
-                <div x-show="loading" class="flex justify-start">
-                    <div class="bg-gray-800 rounded-2xl px-4 py-3">
-                        <div class="flex gap-1">
-                            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay:0ms"></div>
-                            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay:150ms"></div>
-                            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay:300ms"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-3 pb-2 flex gap-2 overflow-x-auto">
-                <button @click="input = 'Dame una pista'; send()"
-                        type="button"
-                        class="text-xs bg-gray-800 text-blue-400 border border-blue-500/30 
-                               rounded-full px-3 py-1 whitespace-nowrap hover:bg-gray-700">
-                    💡 Dame una pista
-                </button>
-                <button @click="input = 'No entiendo el concepto'; send()"
-                        type="button"
-                        class="text-xs bg-gray-800 text-blue-400 border border-blue-500/30 
-                               rounded-full px-3 py-1 whitespace-nowrap hover:bg-gray-700">
-                    🤔 No entiendo
-                </button>
-            </div>
-
-            <div class="px-3 pb-3 flex gap-2">
-                <input x-model="input"
-                       @keydown.enter="send()"
-                       type="text"
-                       placeholder="Escribe tu pregunta..."
-                       class="flex-1 bg-gray-800 border border-gray-600 rounded-xl 
-                              px-3 py-2 text-sm text-white placeholder-gray-500 
-                              focus:outline-none focus:border-blue-500">
-                <button @click="send()" type="button"
-                        :disabled="loading"
-                        class="bg-blue-600 hover:bg-blue-500 text-white 
-                               rounded-xl px-3 py-2 transition">
-                    ➤
-                </button>
-            </div>
-        </div>
-
-        {{-- Toggle button --}}
-        <button @click.stop="open = !open"
-                type="button"
-                class="w-14 h-14 bg-blue-600 hover:bg-blue-500 text-white 
-                       rounded-full shadow-lg flex items-center justify-center 
-                       text-2xl transition hover:scale-110">
-            <span x-show="!open">🤖</span>
-            <span x-show="open" style="display:none">✕</span>
-        </button>
-
-    </div>{{-- end codebot --}}
 
     {{-- CodeMirror --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
@@ -503,4 +379,185 @@
     </script>
     @endif
 
+    {{-- Floating CodeBot for lessons --}}
+<div x-data="{
+        open: false,
+        messages: [{ 
+            role: 'bot', 
+            text: '¡Hola! Soy CodeBot 🤖 Estoy aquí para ayudarte con esta lección. Puedo explicarte conceptos y darte pistas, pero NO te daré la respuesta directa. ¡Así aprendes más! 💪 ¿En qué te puedo ayudar?'
+        }],
+        input: '',
+        loading: false,
+        async send() {
+            if (!this.input.trim() || this.loading) return;
+            const msg = this.input.trim();
+            this.messages.push({ role: 'user', text: msg });
+            this.input = '';
+            this.loading = true;
+            this.$nextTick(() => {
+                const el = document.getElementById('lesson-chat-msgs');
+                if (el) el.scrollTop = el.scrollHeight;
+            });
+            try {
+                const res = await fetch('{{ route('lesson.chat') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                    },
+                    body: JSON.stringify({
+                        message: msg,
+                        lesson_title: @js($lesson->title),
+                        exercise_instructions: @js($exercise?->instructions ?? '')
+                    })
+                });
+                const data = await res.json();
+                this.messages.push({ role: 'bot', text: data.message ?? 'Error al responder.' });
+            } catch(e) {
+                this.messages.push({ role: 'bot', text: 'Error de conexión. Intenta de nuevo. 😅' });
+            }
+            this.loading = false;
+            this.$nextTick(() => {
+                const el = document.getElementById('lesson-chat-msgs');
+                if (el) el.scrollTop = el.scrollHeight;
+            });
+        }
+     }"
+     class="fixed bottom-6 right-6 z-50">
+
+    {{-- Chat panel --}}
+    <div x-show="open"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+         x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+         class="mb-4 w-80 bg-gray-900 border border-gray-700 rounded-2xl 
+                shadow-2xl flex flex-col overflow-hidden"
+         style="height: 440px; display: none;">
+
+        {{-- Header --}}
+        <div class="flex items-center justify-between px-4 py-3 bg-blue-600">
+            <div class="flex items-center gap-2 text-white">
+                <span class="text-xl">🤖</span>
+                <div>
+                    <p class="font-bold text-sm">CodeBot</p>
+                    <p class="text-xs text-blue-200">
+                        Lección: {{ Str::limit($lesson->title, 25) }}
+                    </p>
+                </div>
+            </div>
+            <button @click="open = false" type="button"
+                    class="text-blue-200 hover:text-white text-lg leading-none transition">
+                ✕
+            </button>
+        </div>
+
+        {{-- Warning bar --}}
+        <div class="px-3 py-2 bg-yellow-500/10 border-b border-yellow-500/20">
+            <p class="text-yellow-400 text-xs text-center">
+                ⚠️ CodeBot da pistas pero nunca la respuesta directa
+            </p>
+        </div>
+
+        {{-- Messages --}}
+        <div id="lesson-chat-msgs"
+             class="flex-1 overflow-y-auto p-3 space-y-3">
+            <template x-for="(msg, i) in messages" :key="i">
+                <div :class="msg.role === 'user' 
+                    ? 'flex justify-end' 
+                    : 'flex justify-start gap-2'">
+
+                    {{-- Bot avatar --}}
+                    <div x-show="msg.role === 'bot'"
+                         class="w-6 h-6 rounded-full bg-blue-600 flex items-center 
+                                justify-center text-xs flex-shrink-0 mt-1">
+                        🤖
+                    </div>
+
+                    <div :class="msg.role === 'user'
+                            ? 'bg-blue-600 text-white rounded-2xl rounded-tr-sm px-3 py-2 max-w-[85%] text-sm leading-relaxed'
+                            : 'bg-gray-800 text-gray-200 rounded-2xl rounded-tl-sm px-3 py-2 max-w-[85%] text-sm leading-relaxed'"
+                         x-text="msg.text">
+                    </div>
+                </div>
+            </template>
+
+            {{-- Loading dots --}}
+            <div x-show="loading" class="flex justify-start gap-2">
+                <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center 
+                            justify-center text-xs flex-shrink-0">
+                    🤖
+                </div>
+                <div class="bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3">
+                    <div class="flex gap-1 items-center">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                             style="animation-delay: 0ms"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                             style="animation-delay: 150ms"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                             style="animation-delay: 300ms"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Suggested questions --}}
+        <div class="px-3 pb-2 flex gap-2 overflow-x-auto scrollbar-hide">
+            <button type="button"
+                    @click="input = 'Dame una pista para este ejercicio'; send()"
+                    class="text-xs bg-gray-800 text-blue-400 border border-blue-500/30 
+                           rounded-full px-3 py-1.5 whitespace-nowrap 
+                           hover:bg-gray-700 transition flex-shrink-0">
+                💡 Dame una pista
+            </button>
+            <button type="button"
+                    @click="input = 'No entiendo el concepto de esta lección, explícamelo de otra forma'; send()"
+                    class="text-xs bg-gray-800 text-blue-400 border border-blue-500/30 
+                           rounded-full px-3 py-1.5 whitespace-nowrap 
+                           hover:bg-gray-700 transition flex-shrink-0">
+                🤔 No entiendo
+            </button>
+            <button type="button"
+                    @click="input = 'Dame un ejemplo similar pero diferente al del ejercicio'; send()"
+                    class="text-xs bg-gray-800 text-blue-400 border border-blue-500/30 
+                           rounded-full px-3 py-1.5 whitespace-nowrap 
+                           hover:bg-gray-700 transition flex-shrink-0">
+                📝 Otro ejemplo
+            </button>
+        </div>
+
+        {{-- Input area --}}
+        <div class="px-3 pb-3 flex gap-2">
+            <input x-model="input"
+                   @keydown.enter.prevent="send()"
+                   type="text"
+                   placeholder="Escribe tu pregunta..."
+                   class="flex-1 bg-gray-800 border border-gray-600 rounded-xl 
+                          px-3 py-2 text-sm text-white placeholder-gray-500 
+                          focus:outline-none focus:border-blue-500 transition">
+            <button @click="send()"
+                    type="button"
+                    :disabled="loading || !input.trim()"
+                    class="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 
+                           disabled:cursor-not-allowed text-white rounded-xl 
+                           px-3 py-2 transition">
+                ➤
+            </button>
+        </div>
+    </div>
+
+    {{-- Toggle button --}}
+    <button @click="open = !open"
+            type="button"
+            class="w-14 h-14 bg-blue-600 hover:bg-blue-500 text-white 
+                   rounded-full shadow-lg flex items-center justify-center 
+                   text-2xl transition-all duration-200 hover:scale-110 
+                   active:scale-95">
+        <span x-show="!open">🤖</span>
+        <span x-show="open" style="display:none">✕</span>
+    </button>
+
+</div>
 </x-app-layout>
