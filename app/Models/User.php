@@ -53,6 +53,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_activity_date' => 'date',
+            'xp' => 'integer',
+            'streak_days' => 'integer',
             'is_premium' => 'boolean',
         ];
     }
@@ -109,28 +111,46 @@ class User extends Authenticatable
 
     public function updateStreak(): void
     {
-        $today = \Carbon\Carbon::today()->toDateString();
-        $lastActivity = $this->last_activity_date 
-            ? \Carbon\Carbon::parse($this->last_activity_date)->toDateString()
-            : null;
+        $today = \Carbon\Carbon::now()->format('Y-m-d');
+        $yesterday = \Carbon\Carbon::now()->subDay()->format('Y-m-d');
 
+        // Get last activity as plain Y-m-d string regardless of format
+        $lastActivity = null;
+        if ($this->last_activity_date) {
+            $lastActivity = \Carbon\Carbon::parse($this->last_activity_date)
+                ->format('Y-m-d');
+        }
+
+        \Log::info('Streak check - today: ' . $today . 
+            ', yesterday: ' . $yesterday . 
+            ', lastActivity: ' . ($lastActivity ?? 'null') .
+            ', current streak: ' . ($this->streak_days ?? 0));
+
+        // Already updated today
         if ($lastActivity === $today) {
-            // Already active today, do nothing
+            \Log::info('Already updated today, skipping');
             return;
         }
 
-        $yesterday = \Carbon\Carbon::yesterday()->toDateString();
-
         if ($lastActivity === $yesterday) {
-            // Consecutive day — increment streak
-            $this->streak_days = ($this->streak_days ?? 0) + 1;
+            // Consecutive day — increment
+            $newStreak = ($this->streak_days ?? 0) + 1;
+            \Log::info('Consecutive day! New streak: ' . $newStreak);
         } else {
-            // Gap of more than 1 day OR first activity ever — reset to 1
-            $this->streak_days = 1;
+            // Gap or first time — reset to 1
+            $newStreak = 1;
+            \Log::info('Gap detected or first time. Reset to 1');
         }
 
+        // Use DB update to avoid any casting issues
+        \DB::table('users')->where('id', $this->id)->update([
+            'streak_days' => $newStreak,
+            'last_activity_date' => $today,
+        ]);
+
+        // Refresh local instance
+        $this->streak_days = $newStreak;
         $this->last_activity_date = $today;
-        $this->save();
     }
 
     public function checkAchievements(): array

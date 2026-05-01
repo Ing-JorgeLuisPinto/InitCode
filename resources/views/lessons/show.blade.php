@@ -25,7 +25,7 @@
             <span class="inline-block bg-blue-600/20 text-blue-400 border 
                          border-blue-500/30 rounded-full px-3 py-1 text-xs 
                          font-medium mb-6">
-                ⭐ +{{ $lesson->xp_reward }} XP al completar
+                ⭐ +{{ $exercise ? $exercise->xp_reward : $lesson->xp_reward }} XP al completar
             </span>
 
             {{-- Lesson content --}}
@@ -34,10 +34,22 @@
                 {!! $lesson->content !!}
             </div>
 
+            @if($exercise)
+            <div class="mb-6 p-4 rounded-xl border border-blue-500/20 bg-blue-500/5">
+                <h3 class="text-blue-400 font-semibold mb-3 flex items-center gap-2">
+                    ✍️ ¿Qué debo escribir?
+                </h3>
+                <p class="text-gray-300 text-sm leading-relaxed">
+                    {{ $exercise->instructions }}
+                </p>
+            </div>
+            @endif
+
+
         </div>
 
         {{-- RIGHT PANEL: Exercise --}}
-        <div class="w-2/5 flex flex-col bg-gray-900">
+        <div class="w-2/5 flex flex-col bg-gray-900 overflow-y-auto">
 
             {{-- Editor header --}}
             <div class="flex items-center justify-between px-4 py-3 
@@ -54,42 +66,50 @@
 
             @if($exercise)
             {{-- Reference structure --}}
-            @if($exercise && str_contains($exercise->starter_code, '___'))
-            <div class="px-4 pt-4">
-                <div class="p-3 rounded-lg border border-blue-500/30 bg-blue-500/5 mb-3">
-                    <p class="text-xs text-blue-400 mb-2 font-medium">
-                        💡 Estructura — completa los espacios en blanco (___):
-                    </p>
-                    <pre class="text-sm text-gray-300 font-mono whitespace-pre-wrap 
-                                leading-relaxed">{{ $exercise->starter_code }}</pre>
-                </div>
-            </div>
-            @elseif($exercise)
-            <div class="px-4 pt-4">
-                <div class="p-3 rounded-lg border border-gray-700 bg-gray-800/50 mb-3">
-                    <p class="text-xs text-gray-400 mb-1 font-medium">
-                        📝 Escribe tu solución desde cero en el editor de abajo
-                    </p>
+            @if($exercise)
+            <div class="px-6 pt-6">
+                <div class="p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 backdrop-blur-sm shadow-inner">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-blue-500/20 rounded-lg">
+                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-blue-200 font-semibold">Desafío de Código</h4>
+                            <p class="text-xs text-blue-400/80">Completa el ejercicio en el editor para continuar</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/80 rounded-lg p-4 border border-blue-500/10 font-mono text-sm shadow-2xl">
+                        @if(str_contains($exercise->starter_code, '___'))
+                            <div class="flex items-center gap-2 mb-3 text-xs text-blue-400/60 uppercase tracking-widest font-bold">
+                                <span>Estructura a completar</span>
+                                <div class="h-px flex-1 bg-blue-500/10"></div>
+                            </div>
+                            <pre class="text-blue-100 leading-relaxed">{{ $exercise->starter_code }}</pre>
+                        @else
+                            <div class="flex flex-col items-center justify-center py-4 text-center">
+                                <div class="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center mb-3">
+                                    <span class="text-xl">✨</span>
+                                </div>
+                                <p class="text-blue-200 font-medium italic">¡Escribe tu solución desde cero!</p>
+                                <p class="text-xs text-blue-400/60 mt-1">Usa lo aprendido en la explicación superior</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
             @endif
             @endif
 
             {{-- Code editor area --}}
-            <div class="flex-1 px-4 pb-2">
+            <div class="px-4 pb-2">
                 <textarea id="code-editor" style="display:none;"></textarea>
             </div>
 
             @if($exercise)
-            {{-- Exercise instructions --}}
-            <div class="px-4 pb-3">
-                <div class="p-3 rounded-lg border border-gray-700 bg-gray-800/50">
-                    <p class="text-xs text-gray-400 font-medium mb-1">
-                        ✅ Tu Desafío
-                    </p>
-                    <p class="text-sm text-gray-300">{{ $exercise->instructions }}</p>
-                </div>
-            </div>
+
 
             {{-- Show answer section (Alpine.js) --}}
             <div x-data="{ attempts: 0, revealed: false, confirmReveal: false, correct: false }" 
@@ -310,8 +330,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
 
     <style>
-    .CodeMirror { min-height: 250px; height: auto; font-size: 14px; border-radius: 8px; }
-    .CodeMirror-scroll { min-height: 250px; }
+    .CodeMirror { 
+        min-height: 160px; 
+        height: auto;
+        font-size: 14px; 
+        border-radius: 8px; 
+    }
+    .CodeMirror-scroll { 
+        min-height: 160px; 
+    }
     </style>
 
     <script>
@@ -457,11 +484,21 @@
     </script>
 
     {{-- XP earned toast on first visit --}}
-    @if(!$alreadyCompleted)
+    @if(!$alreadyCompleted && !$exercise)
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // XP toast is shown ONLY after successful exercise submission
-        // not on page load — remove any existing page-load XP toast
+        var xpToast = document.createElement('div');
+        xpToast.className = 'fixed top-6 right-6 z-50 bg-blue-600 text-white ' +
+            'px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 ' +
+            'transition-all duration-500';
+        xpToast.innerHTML = 
+            '<span class="text-2xl">⭐</span>' +
+            '<div>' +
+            '<p class="font-bold text-lg">+{{ $lesson->xp_reward }} XP ganados</p>' +
+            '<p class="text-blue-200 text-sm">¡Lección completada!</p>' +
+            '</div>';
+        document.body.appendChild(xpToast);
+        setTimeout(function() { xpToast.remove(); }, 3000);
     });
     </script>
     @endif

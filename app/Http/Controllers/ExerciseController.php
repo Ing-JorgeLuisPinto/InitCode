@@ -22,122 +22,118 @@ class ExerciseController extends Controller
 
     public function submit(Request $request, Exercise $exercise)
     {
-        // Get code safely - never null
-        $raw = $request->input('code') 
-            ?? $request->input('submitted_code') 
+        // Get code safely
+        $raw = $request->input('code')
+            ?? $request->input('submitted_code')
             ?? '';
         $raw = is_string($raw) ? $raw : '';
-        
-        // If empty, return friendly error without saving to DB
+
+        // Return friendly error if empty
         if (trim($raw) === '') {
             return response()->json([
                 'correct' => false,
-                'message' => '¡Escribe tu respuesta primero! Mira la estructura de referencia 👆',
+                'message' => '¡Escribe tu respuesta primero! 💡',
                 'xp_earned' => 0,
-                'new_total_xp' => auth()->user()->xp
+                'new_total_xp' => auth()->user()->xp,
+                'new_achievements' => []
             ]);
         }
 
-        $revealed = $request->boolean('revealed');
-        
-        // Normalize submitted code
+        $revealed = $request->boolean('revealed', false);
+
+        // Normalize for comparison
         $submitted = $this->normalizeCode($raw);
-        
-        // Normalize expected output  
-        $expected = $this->normalizeCode($exercise->expected_output);
-        
-        // Also normalize solution for comparison
-        $solution = $this->normalizeCode($exercise->solution_code);
-        
-        // Check correctness multiple ways
+        $expected  = $this->normalizeCode($exercise->expected_output);
+        $solution  = $this->normalizeCode($exercise->solution_code);
+
         $isCorrect = (
             $submitted === $expected ||
             $submitted === $solution ||
             str_contains($submitted, $expected) ||
             str_contains($solution, $submitted) ||
-            // Check if running the code would produce expected output
-            $this->extractOutput($submitted) === $this->normalizeCode($exercise->expected_output)
+            $this->extractOutput($submitted) === $expected
         );
-        
-        $user = Auth::user();
+
+        // Check BEFORE saving if this is the first correct attempt
+        $alreadySolvedCorrectly = UserExerciseAttempt::where('user_id', auth()->id())
+            ->where('exercise_id', $exercise->id)
+            ->where('is_correct', true)
+            ->exists();
 
         // Save attempt
         UserExerciseAttempt::create([
-            'user_id' => $user->id,
-            'exercise_id' => $exercise->id,
+            'user_id'        => auth()->id(),
+            'exercise_id'    => $exercise->id,
             'submitted_code' => $raw ?: '(vacío)',
-            'is_correct' => $isCorrect,
-            'attempted_at' => now()
+            'is_correct'     => $isCorrect,
+            'attempted_at'   => now()
         ]);
-        
+
         $xpEarned = 0;
-        if ($isCorrect) {
-            $alreadySolved = UserExerciseAttempt::where([
-                'user_id' => auth()->id(),
-                'exercise_id' => $exercise->id,
-                'is_correct' => true
-            ])->count() === 1; // count is 1 because we just inserted it above
+        $newAchievements = [];
 
-            if ($alreadySolved) {
-                $lesson = $exercise->lesson()->with('course')->first();
-                $exerciseXp = $revealed ? 5 : $exercise->xp_reward;
-                $lessonXp = $lesson->xp_reward;
-                $xpEarned = $exerciseXp + $lessonXp;
+        if ($isCorrect && !$alreadySolvedCorrectly) {
+            // First time solving correctly — award XP
+            $xpEarned = $revealed ? 5 : $exercise->xp_reward;
 
-                auth()->user()->addXP($xpEarned);
-                auth()->user()->updateStreak();
-                
-                $newAchievements = auth()->user()->checkAchievements();
+            \Log::info('XP awarded: ' . $xpEarned .
+                ' | exercise_id: ' . $exercise->id .
+                ' | xp_reward: ' . $exercise->xp_reward .
+                ' | revealed: ' . ($revealed ? 'yes' : 'no'));
 
-                UserProgress::firstOrCreate(
-                    ['user_id' => auth()->id(), 'lesson_id' => $lesson->id],
-                    ['xp_earned' => $xpEarned, 'completed_at' => now()]
-                );
-            }
+            auth()->user()->addXP($xpEarned);
+            auth()->user()->updateStreak();
+
+            // Mark lesson as completed
+            $lesson = $exercise->lesson()->with('course')->first();
+            UserProgress::firstOrCreate(
+                ['user_id' => auth()->id(), 'lesson_id' => $lesson->id],
+                ['xp_earned' => $xpEarned, 'completed_at' => now()]
+            );
+
+            $newAchievements = auth()->user()->checkAchievements();
+        } elseif ($isCorrect && $alreadySolvedCorrectly) {
+            // Already solved before — no XP but still correct
+            \Log::info('Exercise already solved — no XP awarded. exercise_id: ' . $exercise->id);
         }
-        
+
         return response()->json([
-            'correct' => $isCorrect,
-            'message' => $isCorrect 
-                ? '¡Correcto! Muy bien hecho 🎉' 
-                : '¡Casi! Recuerda: ' . $exercise->expected_output . ' 💪',
-            'xp_earned' => $xpEarned,  // This is the REAL amount earned
-            'new_total_xp' => auth()->user()->fresh()->xp,
-            'new_achievements' => isset($newAchievements) 
-                ? collect($newAchievements)->map(fn($a) => [
-                    'name' => $a->name,
-                    'icon' => $a->icon,
+            'correct'          => $isCorrect,
+            'message'          => $isCorrect
+                ? ($alreadySolvedCorrectly
+                    ? '✅ ¡Correcto! Ya habías completado este ejercicio antes.'
+                    : '¡Correcto! Muy bien hecho 🎉')
+                : '¡Casi! Inténtalo de nuevo 💪',
+            'xp_earned'        => $xpEarned,
+            'new_total_xp'     => auth()->user()->fresh()->xp,
+            'new_achievements' => collect($newAchievements)
+                ->map(fn($a) => [
+                    'name'        => $a->name,
+                    'icon'        => $a->icon,
                     'description' => $a->description,
                 ])->values()->toArray()
-                : []
         ]);
     }
 
     private function normalizeCode(?string $code): string
     {
         if ($code === null) return '';
-        
-        // Remove placeholder comments
         $code = str_replace(
-            ['// ESCRIBE TU CODIGO AQUI', '// Escribe tu código aquí...', '// Tu código aquí'],
-            '',
-            $code
+            ['// ESCRIBE TU CODIGO AQUI', '// Escribe tu código aquí...'],
+            '', $code
         );
-        // Normalize whitespace and case
         $code = strtolower(trim($code));
         $code = preg_replace('/\s+/', ' ', $code);
         $code = str_replace(["\r\n", "\r"], "\n", $code);
-        // Remove spaces around operators and punctuation for looser matching
-        $code = preg_replace('/\s*([=;{}()[\],])\s*/', '$1', $code);
+        $code = preg_replace('/\s*([=;{}()\[\],])\s*/', '$1', $code);
         return $code;
     }
 
-    private function extractOutput(string $code): string
+    private function extractOutput(?string $code): string
     {
-        // For simple echo statements, extract what would be printed
-        // e.g. echo 'Ana'; -> ana
-        if (preg_match("/echo\s+['\"](.+?)['\"]/i", $code, $matches)) {
-            return strtolower(trim($matches[1]));
+        if (!$code) return '';
+        if (preg_match("/echo\s+['\"](.+?)['\"]/i", $code, $m)) {
+            return strtolower(trim($m[1]));
         }
         return $code;
     }

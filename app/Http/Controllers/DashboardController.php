@@ -11,7 +11,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $user = Auth::user()->load('level');
+        $user = auth()->user()->fresh()->load('level');
         
         // Find first lesson not in user_progress for user, ordered by course order then lesson order
         $nextLesson = Lesson::whereNotExists(function ($query) use ($user) {
@@ -39,6 +39,15 @@ class DashboardController extends Controller
                 return $progress;
             });
 
-        return view('dashboard', compact('user', 'nextLesson', 'completedCount', 'recentProgress'));
+        $lastActivity = $user->last_activity_date 
+            ? \Carbon\Carbon::parse($user->last_activity_date)
+            : null;
+        $practicedToday = $lastActivity && $lastActivity->isToday();
+        $practicedYesterday = $lastActivity && $lastActivity->isYesterday();
+
+        return view('dashboard', compact(
+            'user', 'nextLesson', 'completedCount', 
+            'recentProgress', 'practicedToday', 'practicedYesterday'
+        ));
     }
 }

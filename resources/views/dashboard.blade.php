@@ -1,13 +1,9 @@
 <x-app-layout>
     @php
-        $lastActivity = auth()->user()->last_activity_date;
-        $streakDays = auth()->user()->streak_days ?? 0;
-        $practicedToday = $lastActivity && \Carbon\Carbon::parse($lastActivity)->isToday();
-        $practicedYesterday = $lastActivity && \Carbon\Carbon::parse($lastActivity)->isYesterday();
+        $streakDays = $user->streak_days ?? 0;
         $streakAtRisk = $streakDays > 1 && !$practicedToday && $practicedYesterday;
-        $streakLost = $streakDays <= 1 && $lastActivity && 
-            !\Carbon\Carbon::parse($lastActivity)->isToday() && 
-            !\Carbon\Carbon::parse($lastActivity)->isYesterday();
+        $streakLost = $streakDays <= 1 && $user->last_activity_date && 
+            !$practicedToday && !$practicedYesterday;
     @endphp
 
     <div class="max-w-7xl mx-auto space-y-10">
@@ -83,12 +79,69 @@
             </div>
             <div class="hidden lg:block text-right">
                 <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Tu progreso semanal</p>
-                <div class="flex gap-2">
-                    @php $days = ['L', 'M', 'X', 'J', 'V', 'S', 'D']; @endphp
-                    @foreach($days as $day)
-                    <div class="w-8 h-8 rounded {{ $loop->index < ($user->streak_days % 7) ? 'bg-secondary text-on-secondary' : 'bg-surface-container border border-outline-variant text-slate-500' }} flex items-center justify-center font-bold text-xs">
-                        {{ $day }}
-                    </div>
+                @php
+                    // Correct Spanish abbreviations — Miércoles is M not X
+                    $weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+                    
+                    // Get Monday of current week
+                    $monday = \Carbon\Carbon::now(\Carbon\CarbonTimeZone::create('America/Bogota'))
+                        ->startOfWeek(\Carbon\Carbon::MONDAY);
+                    
+                    $today = \Carbon\Carbon::now('America/Bogota')->format('Y-m-d');
+                    
+                    // Build array of this week's dates Mon-Sun
+                    $weekDates = [];
+                    for ($i = 0; $i < 7; $i++) {
+                        $weekDates[] = $monday->copy()->addDays($i)->format('Y-m-d');
+                    }
+                    
+                    // Get dates user completed lessons this week
+                    $activeThisWeek = \App\Models\UserProgress::where('user_id', auth()->id())
+                        ->whereNotNull('completed_at')
+                        ->whereBetween('completed_at', [
+                            $monday->copy()->startOfDay(),
+                            $monday->copy()->addDays(6)->endOfDay()
+                        ])
+                        ->get()
+                        ->map(fn($p) => \Carbon\Carbon::parse($p->completed_at)
+                            ->setTimezone('America/Bogota')
+                            ->format('Y-m-d'))
+                        ->unique()
+                        ->toArray();
+                    
+                    // Include today if user has last_activity_date = today
+                    $lastActivity = auth()->user()->last_activity_date
+                        ? \Carbon\Carbon::parse(auth()->user()->last_activity_date)
+                            ->format('Y-m-d')
+                        : null;
+                    if ($lastActivity === $today) {
+                        $activeThisWeek[] = $today;
+                    }
+                    $activeThisWeek = array_unique($activeThisWeek);
+                @endphp
+
+                <div class="flex items-center gap-1.5">
+                    @foreach($weekDays as $index => $day)
+                        @php
+                            $dateForDay = $weekDates[$index];
+                            $isActive = in_array($dateForDay, $activeThisWeek);
+                            $isToday = ($dateForDay === $today);
+                            $isFuture = \Carbon\Carbon::parse($dateForDay)
+                                ->setTimezone('America/Bogota')->isFuture() && !$isToday;
+                        @endphp
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center 
+                                    text-xs font-bold
+                            {{ $isActive && $isToday 
+                                ? 'bg-orange-500 text-white ring-2 ring-orange-300' 
+                                : ($isActive 
+                                    ? 'bg-green-500 text-white' 
+                                    : ($isToday 
+                                        ? 'bg-blue-600/40 text-blue-300 ring-1 ring-blue-500' 
+                                        : ($isFuture 
+                                            ? 'bg-gray-800 text-gray-600' 
+                                            : 'bg-gray-700 text-gray-500'))) }}">
+                            {{ $day }}
+                        </div>
                     @endforeach
                 </div>
             </div>
