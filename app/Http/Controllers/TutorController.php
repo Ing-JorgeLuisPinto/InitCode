@@ -92,52 +92,55 @@ REGLAS:
     private function callGemini(array $contents): string
     {
         $key = env('GEMINI_API_KEY');
+        if (!$key) return 'Error: falta la API key. 😅';
 
-        if (!$key) {
-            \Log::error('Gemini: GEMINI_API_KEY not set');
-            return 'Error: falta la API key. 😅';
-        }
+        $models = [
+            'gemini-2.0-flash-lite',
+            'gemini-2.0-flash-001',
+            'gemini-2.5-flash',
+        ];
 
-        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $key;
-
-        try {
-            $response = Http::timeout(30)
-                ->withHeaders([
-                    'Content-Type' => 'application/json',
-                ])
-                ->post($url, [
-                    'contents' => $contents,
-                    'generationConfig' => [
-                        'temperature' => 0.7,
-                        'maxOutputTokens' => 600,
-                    ],
-                    'safetySettings' => [
+        foreach ($models as $model) {
+            try {
+                $response = Http::timeout(30)
+                    ->withHeaders(['Content-Type' => 'application/json'])
+                    ->post(
+                        'https://generativelanguage.googleapis.com/v1beta/models/'
+                        . $model . ':generateContent?key=' . $key,
                         [
-                            'category' => 'HARM_CATEGORY_HARASSMENT',
-                            'threshold' => 'BLOCK_NONE'
-                        ],
-                        [
-                            'category' => 'HARM_CATEGORY_HATE_SPEECH', 
-                            'threshold' => 'BLOCK_NONE'
+                            'contents' => $contents,
+                            'generationConfig' => [
+                                'temperature' => 0.7,
+                                'maxOutputTokens' => 500,
+                            ]
                         ]
-                    ]
-                ]);
+                    );
 
-            \Log::info('Gemini HTTP status: ' . $response->status());
-            \Log::info('Gemini response: ' . substr($response->body(), 0, 300));
+                \Log::info('Gemini model: ' . $model . ' | status: ' . $response->status());
 
-            if ($response->successful()) {
-                $json = $response->json();
-                $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
-                if ($text) return trim($text);
+                if ($response->status() === 429) {
+                    \Log::warning('Quota exceeded for: ' . $model . ', trying next...');
+                    continue;
+                }
+
+                if ($response->status() === 404) {
+                    \Log::warning('Model not found: ' . $model . ', trying next...');
+                    continue;
+                }
+
+                if ($response->successful()) {
+                    $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                    if ($text) return trim($text);
+                }
+
+                \Log::error('Gemini error ' . $response->status() . ': ' . $response->body());
+
+            } catch (\Exception $e) {
+                \Log::error('Gemini exception (' . $model . '): ' . $e->getMessage());
+                continue;
             }
-
-            \Log::error('Gemini failed: ' . $response->body());
-
-        } catch (\Exception $e) {
-            \Log::error('Gemini exception: ' . $e->getMessage());
         }
 
-        return 'No pude responder en este momento. Intenta de nuevo. 😅';
+        return 'No pude conectarme al servidor de IA. Intenta de nuevo. 😅';
     }
 }
