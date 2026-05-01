@@ -71,24 +71,27 @@ class ExerciseController extends Controller
         ]);
         
         $xpEarned = 0;
-        $newAchievements = [];
         if ($isCorrect) {
             $alreadySolved = UserExerciseAttempt::where([
-                'user_id' => $user->id,
+                'user_id' => auth()->id(),
                 'exercise_id' => $exercise->id,
                 'is_correct' => true
-            ])->count() === 1;
-            
+            ])->count() === 1; // count is 1 because we just inserted it above
+
             if ($alreadySolved) {
-                $xpEarned = $revealed ? 5 : $exercise->xp_reward;
-                $user->addXP($xpEarned);
-                $user->updateStreak();
-                $newAchievements = $user->checkAchievements();
+                $lesson = $exercise->lesson()->with('course')->first();
+                $exerciseXp = $revealed ? 5 : $exercise->xp_reward;
+                $lessonXp = $lesson->xp_reward;
+                $xpEarned = $exerciseXp + $lessonXp;
+
+                auth()->user()->addXP($xpEarned);
+                auth()->user()->updateStreak();
                 
-                $lesson = $exercise->lesson;
+                $newAchievements = auth()->user()->checkAchievements();
+
                 UserProgress::firstOrCreate(
-                    ['user_id' => $user->id, 'lesson_id' => $lesson->id],
-                    ['xp_earned' => $lesson->xp_reward, 'completed_at' => now()]
+                    ['user_id' => auth()->id(), 'lesson_id' => $lesson->id],
+                    ['xp_earned' => $xpEarned, 'completed_at' => now()]
                 );
             }
         }
@@ -97,10 +100,16 @@ class ExerciseController extends Controller
             'correct' => $isCorrect,
             'message' => $isCorrect 
                 ? '¡Correcto! Muy bien hecho 🎉' 
-                : '¡Casi! Recuerda que la respuesta esperada es: ' . $exercise->expected_output . ' 💪',
-            'xp_earned' => $xpEarned,
-            'new_total_xp' => $user->fresh()->xp,
-            'new_achievements' => $newAchievements
+                : '¡Casi! Recuerda: ' . $exercise->expected_output . ' 💪',
+            'xp_earned' => $xpEarned,  // This is the REAL amount earned
+            'new_total_xp' => auth()->user()->fresh()->xp,
+            'new_achievements' => isset($newAchievements) 
+                ? collect($newAchievements)->map(fn($a) => [
+                    'name' => $a->name,
+                    'icon' => $a->icon,
+                    'description' => $a->description,
+                ])->values()->toArray()
+                : []
         ]);
     }
 

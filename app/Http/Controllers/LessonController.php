@@ -20,6 +20,7 @@ class LessonController extends Controller
             ->firstOrFail();
 
         $user = Auth::user();
+        $user->updateStreak();
         $alreadyCompleted = UserProgress::where(['user_id' => $user->id, 'lesson_id' => $lesson->id])->exists();
         $newAchievements = [];
 

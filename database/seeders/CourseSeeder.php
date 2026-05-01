@@ -324,7 +324,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => '<h1>Mi primera página</h1>',
                 'exercise' => [
                     'instructions' => 'Crea un título h1 que diga "Mi primera página"',
-                    'starter_code' => '<___>Mi primera página</___>',
+                    'starter_code' => '<___>___</___>',
                     'solution_code' => '<h1>Mi primera página</h1>',
                     'expected_output' => '<h1>Mi primera página</h1>',
                     'xp_reward' => 25
@@ -339,7 +339,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => '<p>Hola, este es un párrafo.</p>',
                 'exercise' => [
                     'instructions' => 'Crea un párrafo que diga "Hola mundo"',
-                    'starter_code' => '<___>Hola mundo</___>',
+                    'starter_code' => '<___>___</___>',
                     'solution_code' => '<p>Hola mundo</p>',
                     'expected_output' => '<p>Hola mundo</p>',
                     'xp_reward' => 25
@@ -354,7 +354,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => '<a href="https://google.com">Ir a Google</a>',
                 'exercise' => [
                     'instructions' => 'Completa el atributo para ir a https://google.com',
-                    'starter_code' => '<a ___="https://google.com">Ir a Google</a>',
+                    'starter_code' => '<a ___="___">Ir a Google</a>',
                     'solution_code' => '<a href="https://google.com">Ir a Google</a>',
                     'expected_output' => 'href="https://google.com"',
                     'xp_reward' => 25
@@ -369,7 +369,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => '<b>Texto en negrita</b>',
                 'exercise' => [
                     'instructions' => 'Cierra correctamente la etiqueta b de negrita',
-                    'starter_code' => '<b>Texto en negrita<___b>',
+                    'starter_code' => '<b>Texto en negrita<___>',
                     'solution_code' => '<b>Texto en negrita</b>',
                     'expected_output' => '</b>',
                     'xp_reward' => 25
@@ -384,7 +384,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => '<body>Contenido visible</body>',
                 'exercise' => [
                     'instructions' => 'Crea la etiqueta body para el contenido',
-                    'starter_code' => '<___>Contenido visible</___>',
+                    'starter_code' => '<___>___</___>',
                     'solution_code' => '<body>Contenido visible</body>',
                     'expected_output' => '<body>Contenido visible</body>',
                     'xp_reward' => 25
@@ -400,7 +400,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => "<ul> <li>Manzana</li> <li>Pera</li> </ul>",
                 'exercise' => [
                     'instructions' => 'Crea una lista desordenada (ul)',
-                    'starter_code' => "<___>\n  <li>Manzana</li>\n  <li>Pera</li>\n</___>",
+                    'starter_code' => "<___>\n  <li>___</li>\n  <li>___</li>\n</___>",
                     'solution_code' => "<ul>\n  <li>Manzana</li>\n  <li>Pera</li>\n</ul>",
                     'expected_output' => "<ul> <li>Manzana</li> <li>Pera</li> </ul>",
                     'xp_reward' => 15
@@ -415,7 +415,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => "<img src='foto.jpg' alt='Mi foto'>",
                 'exercise' => [
                     'instructions' => 'Completa el atributo src',
-                    'starter_code' => "<img ___='foto.jpg' alt='Mi foto'>",
+                    'starter_code' => "<img ___='___' alt='___'>",
                     'solution_code' => "<img src='foto.jpg' alt='Mi foto'>",
                     'expected_output' => "src='foto.jpg'",
                     'xp_reward' => 15
@@ -430,7 +430,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => "<table> <tr> <th>Nombre</th> <th>Edad</th> </tr> </table>",
                 'exercise' => [
                     'instructions' => 'Completa los encabezados de la tabla (th)',
-                    'starter_code' => "<table>\n  <tr>\n    <___>Nombre</___>\n    <___>Edad</___>\n  </tr>\n</table>",
+                    'starter_code' => "<table>\n  <tr>\n    <___>___</___>\n    <___>___</___>\n  </tr>\n</table>",
                     'solution_code' => "<table>\n  <tr>\n    <th>Nombre</th>\n    <th>Edad</th>\n  </tr>\n</table>",
                     'expected_output' => "<th>Nombre</th> <th>Edad</th>",
                     'xp_reward' => 20
@@ -445,7 +445,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => "<input type='text'>",
                 'exercise' => [
                     'instructions' => 'Define el input como tipo texto',
-                    'starter_code' => "<form>\n  <input ___='text' name='nombre' placeholder='Tu nombre'>\n  <button>Enviar</button>\n</form>",
+                    'starter_code' => "<form>\n  <input ___='___' name='___' placeholder='___'>\n  <button>___</button>\n</form>",
                     'solution_code' => "<form>\n  <input type='text' name='nombre' placeholder='Tu nombre'>\n  <button>Enviar</button>\n</form>",
                     'expected_output' => "type='text'",
                     'xp_reward' => 20
@@ -460,7 +460,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => "<div> ... </div>",
                 'exercise' => [
                     'instructions' => 'Envuelve el contenido en un div',
-                    'starter_code' => "<___>\n  <h1>Título</h1>\n  <p>Contenido</p>\n</___>",
+                    'starter_code' => "<___>\n  <h1>___</h1>\n  <p>___</p>\n</___>",
                     'solution_code' => "<div>\n  <h1>Título</h1>\n  <p>Contenido</p>\n</div>",
                     'expected_output' => "<div> <h1>Título</h1> <p>Contenido</p> </div>",
                     'xp_reward' => 20
@@ -475,7 +475,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => "class='contenedor' id='intro'",
                 'exercise' => [
                     'instructions' => 'Asigna la clase "contenedor" y el id "intro"',
-                    'starter_code' => "<div ___='contenedor'>\n  <p ___='intro'>Hola</p>\n</div>",
+                    'starter_code' => "<div ___='___'>\n  <p ___='___'>___</p>\n</div>",
                     'solution_code' => "<div class='contenedor'>\n  <p id='intro'>Hola</p>\n</div>",
                     'expected_output' => "class='contenedor' id='intro'",
                     'xp_reward' => 25
@@ -490,7 +490,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => "<header> <nav>Menú</nav> </header> <main> <p>Contenido</p> </main>",
                 'exercise' => [
                     'instructions' => 'Usa etiquetas semánticas para el encabezado y el contenido principal',
-                    'starter_code' => "<___>\n  <nav>Menú</nav>\n</___>\n<___>\n  <p>Contenido</p>\n</___>",
+                    'starter_code' => "<___>\n  <nav>___</nav>\n</___>\n<___>\n  <p>___</p>\n</___>",
                     'solution_code' => "<header>\n  <nav>Menú</nav>\n</header>\n<main>\n  <p>Contenido</p>\n</main>",
                     'expected_output' => "<header> <nav>Menú</nav> </header> <main> <p>Contenido</p> </main>",
                     'xp_reward' => 25
@@ -505,7 +505,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => "<meta charset='UTF-8'>",
                 'exercise' => [
                     'instructions' => 'Agrega las etiquetas meta necesarias',
-                    'starter_code' => "<head>\n  <___ charset='UTF-8'>\n  <___ name='description' content='Mi sitio'>\n</head>",
+                    'starter_code' => "<head>\n  <___ charset='___'>\n  <___ name='___' content='___'>\n</head>",
                     'solution_code' => "<head>\n  <meta charset='UTF-8'>\n  <meta name='description' content='Mi sitio'>\n</head>",
                     'expected_output' => "<meta charset='UTF-8'> <meta name='description' content='Mi sitio'>",
                     'xp_reward' => 30
@@ -520,7 +520,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => "<link rel='stylesheet'>",
                 'exercise' => [
                     'instructions' => 'Vincula el archivo estilos.css',
-                    'starter_code' => "<head>\n  <___ rel='stylesheet' href='estilos.css'>\n</head>",
+                    'starter_code' => "<head>\n  <___ rel='___' href='___'>\n</head>",
                     'solution_code' => "<head>\n  <link rel='stylesheet' href='estilos.css'>\n</head>",
                     'expected_output' => "<link rel='stylesheet' href='estilos.css'>",
                     'xp_reward' => 30
@@ -535,7 +535,7 @@ class CourseSeeder extends Seeder
                 'expectedResult' => "<!DOCTYPE html>",
                 'exercise' => [
                     'instructions' => 'Agrega el DOCTYPE y el contenedor main',
-                    'starter_code' => "<!DOCTYPE ___>\n<html lang='es'>\n<head>\n  <meta charset='UTF-8'>\n  <title>Mi Página</title>\n</head>\n<body>\n  <header><h1>Mi Sitio</h1></header>\n  <___><p>Contenido principal</p></___>\n  <footer><p>© 2025</p></footer>\n</body>\n</html>",
+                    'starter_code' => "<!DOCTYPE ___>\n<html lang='___'>\n<head>\n  <meta charset='___'>\n  <title>___</title>\n</head>\n<body>\n  <header><h1>___</h1></header>\n  <___><p>___</p></___>\n  <footer><p>© 2025</p></footer>\n</body>\n</html>",
                     'solution_code' => "<!DOCTYPE html>\n<html lang='es'>\n<head>\n  <meta charset='UTF-8'>\n  <title>Mi Página</title>\n</head>\n<body>\n  <header><h1>Mi Sitio</h1></header>\n  <main><p>Contenido principal</p></main>\n  <footer><p>© 2025</p></footer>\n</body>\n</html>",
                     'expected_output' => "<!DOCTYPE html>",
                     'xp_reward' => 40

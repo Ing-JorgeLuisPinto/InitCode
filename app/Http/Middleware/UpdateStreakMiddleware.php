@@ -16,13 +16,8 @@ class UpdateStreakMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check()) {
-            $user = Auth::user();
-            $today = now()->toDateString();
-            
-            if ($user->last_activity_date === null || $user->last_activity_date->toDateString() !== $today) {
-                $user->updateStreak();
-            }
+        if (auth()->check()) {
+            auth()->user()->updateStreak();
         }
 
         return $next($request);

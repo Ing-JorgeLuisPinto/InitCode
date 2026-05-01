@@ -54,14 +54,25 @@
 
             @if($exercise)
             {{-- Reference structure --}}
+            @if($exercise && str_contains($exercise->starter_code, '___'))
             <div class="px-4 pt-4">
                 <div class="p-3 rounded-lg border border-blue-500/30 bg-blue-500/5 mb-3">
                     <p class="text-xs text-blue-400 mb-2 font-medium">
-                        💡 Estructura de referencia:
+                        💡 Estructura — completa los espacios en blanco (___):
                     </p>
-                    <pre class="text-sm text-gray-300 font-mono whitespace-pre-wrap">{{ $exercise->starter_code }}</pre>
+                    <pre class="text-sm text-gray-300 font-mono whitespace-pre-wrap 
+                                leading-relaxed">{{ $exercise->starter_code }}</pre>
                 </div>
             </div>
+            @elseif($exercise)
+            <div class="px-4 pt-4">
+                <div class="p-3 rounded-lg border border-gray-700 bg-gray-800/50 mb-3">
+                    <p class="text-xs text-gray-400 mb-1 font-medium">
+                        📝 Escribe tu solución desde cero en el editor de abajo
+                    </p>
+                </div>
+            </div>
+            @endif
             @endif
 
             {{-- Code editor area --}}
@@ -371,18 +382,36 @@
                     var panel = document.getElementById('result-panel');
 
                     if (data.correct) {
-                        // If correct, immediately hide the show-answer button
+                        // Set correct flag immediately
                         try {
                             var el = document.querySelector('[x-data]');
                             if (el && el.__x) el.__x.$data.correct = true;
                             else if (el && el._x_dataStack) el._x_dataStack[0].correct = true;
                         } catch(err) {}
 
-                        panel.innerHTML =
-                            '<div class="p-4 bg-green-500/20 border border-green-500/30 rounded-lg mt-3">' +
-                            '<p class="text-green-400 font-bold">✅ ¡Correcto! +' + data.xp_earned + ' XP 🎉</p>' +
-                            '<p class="text-green-300 text-sm mt-1">Pasando a la siguiente lección...</p>' +
+                        // Show XP toast with REAL xp_earned from server
+                        var xpToast = document.createElement('div');
+                        xpToast.className = 'fixed top-6 right-6 z-50 bg-blue-600 text-white ' +
+                            'px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 ' +
+                            'transition-all duration-500';
+                        xpToast.innerHTML = 
+                            '<span class="text-2xl">⭐</span>' +
+                            '<div>' +
+                            '<p class="font-bold text-lg">+' + data.xp_earned + ' XP ganados</p>' +
+                            '<p class="text-blue-200 text-sm">¡Ejercicio completado!</p>' +
                             '</div>';
+                        document.body.appendChild(xpToast);
+                        setTimeout(function() { xpToast.remove(); }, 3000);
+
+                        // Show result panel
+                        var panel = document.getElementById('result-panel');
+                        if (panel) {
+                            panel.innerHTML =
+                                '<div class="p-4 bg-green-500/20 border border-green-500/30 rounded-lg mt-3">' +
+                                '<p class="text-green-400 font-bold">✅ ¡Correcto! 🎉</p>' +
+                                '<p class="text-green-300 text-sm mt-1">Pasando a la siguiente lección...</p>' +
+                                '</div>';
+                        }
 
                         if (data.new_achievements && data.new_achievements.length > 0) {
                             data.new_achievements.forEach(function(a) {
@@ -397,9 +426,10 @@
                             });
                         }
 
+                        // Redirect after 2.5 seconds
                         setTimeout(function() {
                             window.location.href = btn.dataset.next;
-                        }, 2000);
+                        }, 2500);
 
                     } else {
                         panel.innerHTML =
@@ -430,17 +460,8 @@
     @if(!$alreadyCompleted)
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            var t = document.createElement('div');
-            t.className = 'fixed top-6 right-6 z-50 bg-blue-600 text-white ' +
-                'px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 ' +
-                'transition-all duration-500';
-            t.innerHTML = '<span class="text-2xl">⭐</span>' +
-                '<div><p class="font-bold">+{{ $lesson->xp_reward }} XP ganados</p>' +
-                '<p class="text-blue-200 text-sm">{{ $lesson->title }} completada</p></div>';
-            document.body.appendChild(t);
-            setTimeout(function() { t.remove(); }, 3000);
-        }, 800);
+        // XP toast is shown ONLY after successful exercise submission
+        // not on page load — remove any existing page-load XP toast
     });
     </script>
     @endif

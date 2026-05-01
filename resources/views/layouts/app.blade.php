@@ -157,9 +157,18 @@
     <!-- TopNavBar -->
     <header class="fixed top-0 right-0 h-[72px] left-64 w-[calc(100%-16rem)] flex justify-end items-center px-8 z-40 bg-[#0A0F1E]/80 backdrop-blur-md border-b border-[#1F2937] shadow-xl shadow-black/20">
         <div class="flex items-center gap-6">
-            <div class="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-[#1F2937]">
-                <span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
-                <span class="font-h2 text-sm text-tertiary">{{ Auth::user()->streak_days }}</span>
+            @php
+                $streakUser = auth()->user();
+                $streakActive = $streakUser->last_activity_date && 
+                    \Carbon\Carbon::parse($streakUser->last_activity_date)->isToday();
+            @endphp
+
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full
+                        {{ $streakActive ? 'bg-orange-500/20 border border-orange-500/40' : 'bg-gray-800 border border-gray-700' }}">
+                <span class="{{ $streakActive ? 'animate-pulse' : 'opacity-50' }} text-lg">🔥</span>
+                <span class="{{ $streakActive ? 'text-orange-400 font-bold' : 'text-gray-500' }} text-sm">
+                    {{ $streakUser->streak_days ?? 0 }}
+                </span>
             </div>
             <div class="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-[#1F2937]">
                 <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">military_tech</span>

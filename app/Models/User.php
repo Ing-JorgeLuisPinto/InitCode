@@ -109,20 +109,24 @@ class User extends Authenticatable
 
     public function updateStreak(): void
     {
-        $today = now()->startOfDay();
-        $lastActivity = $this->last_activity_date ? $this->last_activity_date->startOfDay() : null;
+        $today = \Carbon\Carbon::today()->toDateString();
+        $lastActivity = $this->last_activity_date 
+            ? \Carbon\Carbon::parse($this->last_activity_date)->toDateString()
+            : null;
 
-        if (!$lastActivity) {
-            $this->streak_days = 1;
+        if ($lastActivity === $today) {
+            // Already active today, do nothing
+            return;
+        }
+
+        $yesterday = \Carbon\Carbon::yesterday()->toDateString();
+
+        if ($lastActivity === $yesterday) {
+            // Consecutive day — increment streak
+            $this->streak_days = ($this->streak_days ?? 0) + 1;
         } else {
-            $diff = $today->diffInDays($lastActivity);
-
-            if ($diff === 1) {
-                $this->increment('streak_days');
-            } elseif ($diff > 1) {
-                $this->streak_days = 1;
-            }
-            // If diff == 0, no change
+            // Gap of more than 1 day OR first activity ever — reset to 1
+            $this->streak_days = 1;
         }
 
         $this->last_activity_date = $today;

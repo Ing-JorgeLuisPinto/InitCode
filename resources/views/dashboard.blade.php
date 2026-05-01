@@ -1,5 +1,69 @@
 <x-app-layout>
+    @php
+        $lastActivity = auth()->user()->last_activity_date;
+        $streakDays = auth()->user()->streak_days ?? 0;
+        $practicedToday = $lastActivity && \Carbon\Carbon::parse($lastActivity)->isToday();
+        $practicedYesterday = $lastActivity && \Carbon\Carbon::parse($lastActivity)->isYesterday();
+        $streakAtRisk = $streakDays > 1 && !$practicedToday && $practicedYesterday;
+        $streakLost = $streakDays <= 1 && $lastActivity && 
+            !\Carbon\Carbon::parse($lastActivity)->isToday() && 
+            !\Carbon\Carbon::parse($lastActivity)->isYesterday();
+    @endphp
+
     <div class="max-w-7xl mx-auto space-y-10">
+        <!-- Streak Warning/Status Banners -->
+        @if($practicedToday)
+        <div class="mb-4 p-4 bg-green-500/10 border border-green-500/30 
+                    rounded-xl flex items-center gap-3">
+            <span class="text-2xl">✅</span>
+            <div>
+                <p class="text-green-400 font-semibold">
+                    ¡Ya practicaste hoy! Racha activa: {{ $streakDays }} días 🔥
+                </p>
+                <p class="text-green-300 text-sm">Sigue así mañana para mantenerla.</p>
+            </div>
+        </div>
+        @elseif($streakAtRisk)
+        <div class="mb-4 p-4 bg-orange-500/10 border border-orange-500/30 
+                    rounded-xl flex items-center gap-3">
+            <span class="text-2xl animate-bounce">⚠️</span>
+            <div>
+                <p class="text-orange-400 font-semibold">
+                    ¡Tu racha de {{ $streakDays }} días está en riesgo!
+                </p>
+                <p class="text-orange-300 text-sm">
+                    Completa una lección hoy para mantenerla. 💪
+                </p>
+            </div>
+        </div>
+        @elseif($streakLost)
+        <div class="mb-4 p-4 bg-red-500/10 border border-red-500/30 
+                    rounded-xl flex items-center gap-3">
+            <span class="text-2xl">💔</span>
+            <div>
+                <p class="text-red-400 font-semibold">
+                    Perdiste tu racha. ¡Empieza una nueva hoy!
+                </p>
+                <p class="text-red-300 text-sm">
+                    Completa una lección para comenzar de nuevo. 🚀
+                </p>
+            </div>
+        </div>
+        @else
+        <div class="mb-4 p-4 bg-blue-500/10 border border-blue-500/30 
+                    rounded-xl flex items-center gap-3">
+            <span class="text-2xl">🎯</span>
+            <div>
+                <p class="text-blue-400 font-semibold">
+                    ¡Practica hoy para comenzar tu racha!
+                </p>
+                <p class="text-blue-300 text-sm">
+                    Las rachas se construyen día a día. 🔥
+                </p>
+            </div>
+        </div>
+        @endif
+
         <!-- Welcome Banner -->
         <section class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
