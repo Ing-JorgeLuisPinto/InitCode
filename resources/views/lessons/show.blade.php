@@ -36,11 +36,13 @@
 
             @if($exercise)
             <div class="mb-6 p-4 rounded-xl border border-blue-500/20 bg-blue-500/5">
-                <h3 class="text-blue-400 font-semibold mb-3 flex items-center gap-2">
-                    ✍️ ¿Qué debo escribir?
-                </h3>
+                <h3 class="text-blue-400 font-semibold mb-3">✍️ ¿Qué debo escribir?</h3>
                 <p class="text-gray-300 text-sm leading-relaxed">
                     {{ $exercise->instructions }}
+                </p>
+                <p class="text-gray-500 text-xs mt-3">
+                    💡 Escribe tu solución en el editor de la derecha. 
+                    Si necesitas ayuda usa el CodeBot 🤖 o las pistas.
                 </p>
             </div>
             @endif
