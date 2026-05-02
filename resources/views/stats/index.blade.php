@@ -55,73 +55,173 @@
 
         {{-- XP por día --}}
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-            <h2 class="font-bold text-white mb-1">⭐ XP ganado por día</h2>
-            <p class="text-gray-500 text-xs mb-5">Últimos 14 días</p>
-            
-            @php
-                $maxXp = max(array_column($xpByDay, 'xp')) ?: 1;
-            @endphp
-            
-            <div class="flex items-end gap-1.5 h-32">
-                @foreach($xpByDay as $day)
-                @php
-                    $height = $day['xp'] > 0 
-                        ? max(8, round(($day['xp'] / $maxXp) * 100)) 
-                        : 0;
-                    $isToday = $day['date'] === \Carbon\Carbon::now()->format('Y-m-d');
-                @endphp
-                <div class="flex-1 flex flex-col items-center gap-1"
-                     title="{{ $day['xp'] }} XP el {{ $day['date'] }}">
-                    <span class="text-xs text-gray-500 font-mono">
-                        {{ $day['xp'] > 0 ? $day['xp'] : '' }}
-                    </span>
-                    <div class="w-full rounded-t-sm transition-all"
-                         style="height: {{ $height }}%; 
-                                min-height: {{ $day['xp'] > 0 ? '4px' : '0' }};
-                                background: {{ $isToday ? '#39FF8A' : '#4F8EF7' }};
-                                opacity: {{ $day['xp'] > 0 ? '1' : '0.1' }};">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h2 class="font-bold text-white">⭐ XP ganado por día</h2>
+                    <p class="text-gray-500 text-xs mt-0.5">Últimos 14 días</p>
+                </div>
+                @php $totalXpPeriod = array_sum(array_column($xpByDay, 'xp')); @endphp
+                <div class="text-right">
+                    <p class="text-blue-400 font-black text-xl">{{ $totalXpPeriod }}</p>
+                    <p class="text-gray-500 text-xs">XP total</p>
+                </div>
+            </div>
+
+            @php $maxXp = max(array_column($xpByDay, 'xp')) ?: 1; @endphp
+
+            <div class="relative h-36 mb-2">
+                {{-- Y axis grid lines --}}
+                <div class="absolute inset-0 flex flex-col justify-between 
+                            pointer-events-none">
+                    @for($g = 0; $g < 4; $g++)
+                    <div class="w-full border-t border-gray-800/60"></div>
+                    @endfor
+                </div>
+                
+                {{-- Bars --}}
+                <div class="absolute inset-0 flex items-end gap-1 px-0">
+                    @foreach($xpByDay as $day)
+                    @php
+                        $barHeight = $day['xp'] > 0 
+                            ? max(6, (int) round(($day['xp'] / $maxXp) * 130))
+                            : 2;
+                        $isToday = $day['date'] === \Carbon\Carbon::now()->format('Y-m-d');
+                        $hasData = $day['xp'] > 0;
+                        $color = $isToday 
+                            ? 'background: linear-gradient(to top, #059669, #34d399);'
+                            : ($hasData 
+                                ? 'background: linear-gradient(to top, #1d4ed8, #60a5fa);'
+                                : 'background: rgba(55,65,81,0.4);');
+                    @endphp
+                    <div class="flex-1 flex flex-col items-center justify-end h-full 
+                                group relative">
+                        @if($hasData)
+                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 
+                                    bg-gray-800 border border-gray-700 rounded px-1.5 py-0.5
+                                    text-white whitespace-nowrap opacity-0 
+                                    group-hover:opacity-100 transition z-10
+                                    pointer-events-none"
+                             style="font-size:10px; bottom: {{ $barHeight + 4 }}px;">
+                            {{ $day['xp'] }}xp
+                        </div>
+                        @endif
+                        <div class="w-full rounded-t-sm"
+                             style="{{ $color }} height: {{ $barHeight }}px;">
+                        </div>
                     </div>
-                    <span class="text-xs text-gray-600 rotate-0"
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- X axis labels --}}
+            <div class="flex gap-1">
+                @foreach($xpByDay as $day)
+                @php $isToday = $day['date'] === \Carbon\Carbon::now()->format('Y-m-d'); @endphp
+                <div class="flex-1 text-center">
+                    <span class="text-gray-{{ $isToday ? '300' : '600' }} font-{{ $isToday ? 'bold' : 'normal' }}"
                           style="font-size: 9px;">
                         {{ $day['label'] }}
                     </span>
                 </div>
                 @endforeach
             </div>
+
+            {{-- Legend --}}
+            <div class="flex items-center gap-4 mt-3 pt-3 border-t border-gray-800">
+                <div class="flex items-center gap-1.5">
+                    <div class="w-3 h-3 rounded-sm"
+                         style="background: linear-gradient(to top, #1d4ed8, #60a5fa)"></div>
+                    <span class="text-gray-500 text-xs">XP ganado</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-3 h-3 rounded-sm"
+                         style="background: linear-gradient(to top, #059669, #34d399)"></div>
+                    <span class="text-gray-500 text-xs">Hoy</span>
+                </div>
+            </div>
         </div>
 
         {{-- Lecciones por día --}}
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-            <h2 class="font-bold text-white mb-1">📚 Lecciones por día</h2>
-            <p class="text-gray-500 text-xs mb-5">Últimos 14 días</p>
-            
-            @php
-                $maxLessons = max(array_column($lessonsByDay, 'count')) ?: 1;
-            @endphp
-            
-            <div class="flex items-end gap-1.5 h-32">
-                @foreach($lessonsByDay as $day)
-                @php
-                    $height = $day['count'] > 0 
-                        ? max(8, round(($day['count'] / $maxLessons) * 100)) 
-                        : 0;
-                    $isToday = $day['date'] === \Carbon\Carbon::now()->format('Y-m-d');
-                @endphp
-                <div class="flex-1 flex flex-col items-center gap-1">
-                    <span class="text-xs text-gray-500 font-mono">
-                        {{ $day['count'] > 0 ? $day['count'] : '' }}
-                    </span>
-                    <div class="w-full rounded-t-sm transition-all"
-                         style="height: {{ $height }}%;
-                                min-height: {{ $day['count'] > 0 ? '4px' : '0' }};
-                                background: {{ $isToday ? '#FF6B35' : '#A855F7' }};
-                                opacity: {{ $day['count'] > 0 ? '1' : '0.1' }};">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h2 class="font-bold text-white">📚 Lecciones por día</h2>
+                    <p class="text-gray-500 text-xs mt-0.5">Últimos 14 días</p>
+                </div>
+                @php $totalLessonsPeriod = array_sum(array_column($lessonsByDay, 'count')); @endphp
+                <div class="text-right">
+                    <p class="text-purple-400 font-black text-xl">{{ $totalLessonsPeriod }}</p>
+                    <p class="text-gray-500 text-xs">lecciones</p>
+                </div>
+            </div>
+
+            @php $maxL = max(array_column($lessonsByDay, 'count')) ?: 1; @endphp
+
+            <div class="relative h-36 mb-2">
+                <div class="absolute inset-0 flex flex-col justify-between 
+                            pointer-events-none">
+                    @for($g = 0; $g < 4; $g++)
+                    <div class="w-full border-t border-gray-800/60"></div>
+                    @endfor
+                </div>
+                
+                <div class="absolute inset-0 flex items-end gap-1 px-0">
+                    @foreach($lessonsByDay as $day)
+                    @php
+                        $barHeight = $day['count'] > 0 
+                            ? max(6, (int) round(($day['count'] / $maxL) * 130))
+                            : 2;
+                        $isToday = $day['date'] === \Carbon\Carbon::now()->format('Y-m-d');
+                        $hasData = $day['count'] > 0;
+                        $color = $isToday 
+                            ? 'background: linear-gradient(to top, #c2410c, #fb923c);'
+                            : ($hasData 
+                                ? 'background: linear-gradient(to top, #7e22ce, #c084fc);'
+                                : 'background: rgba(55,65,81,0.4);');
+                    @endphp
+                    <div class="flex-1 flex flex-col items-center justify-end h-full 
+                                group relative">
+                        @if($hasData)
+                        <div class="absolute left-1/2 -translate-x-1/2 
+                                    bg-gray-800 border border-gray-700 rounded px-1.5 py-0.5
+                                    text-white whitespace-nowrap opacity-0 
+                                    group-hover:opacity-100 transition z-10
+                                    pointer-events-none"
+                             style="font-size:10px; bottom: {{ $barHeight + 4 }}px;">
+                            {{ $day['count'] }}
+                        </div>
+                        @endif
+                        <div class="w-full rounded-t-sm"
+                             style="{{ $color }} height: {{ $barHeight }}px;">
+                        </div>
                     </div>
-                    <span style="font-size: 9px;" class="text-gray-600">
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="flex gap-1">
+                @foreach($lessonsByDay as $day)
+                @php $isToday = $day['date'] === \Carbon\Carbon::now()->format('Y-m-d'); @endphp
+                <div class="flex-1 text-center">
+                    <span class="text-gray-{{ $isToday ? '300' : '600' }} font-{{ $isToday ? 'bold' : 'normal' }}"
+                          style="font-size: 9px;">
                         {{ $day['label'] }}
                     </span>
                 </div>
                 @endforeach
+            </div>
+
+            <div class="flex items-center gap-4 mt-3 pt-3 border-t border-gray-800">
+                <div class="flex items-center gap-1.5">
+                    <div class="w-3 h-3 rounded-sm"
+                         style="background: linear-gradient(to top, #7e22ce, #c084fc)"></div>
+                    <span class="text-gray-500 text-xs">Lecciones</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-3 h-3 rounded-sm"
+                         style="background: linear-gradient(to top, #c2410c, #fb923c)"></div>
+                    <span class="text-gray-500 text-xs">Hoy</span>
+                </div>
             </div>
         </div>
 
@@ -219,51 +319,56 @@
 
         {{-- Actividad general --}}
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-            <h2 class="font-bold text-white mb-4">📅 Actividad</h2>
+            <h2 class="font-bold text-white mb-5">📅 Actividad</h2>
             
             <div class="space-y-4">
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-400 text-sm">Días aprendiendo</span>
-                    <span class="font-bold text-white">{{ $daysLearning }}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-400 text-sm">Racha actual</span>
-                    <span class="font-bold text-orange-400">
-                        🔥 {{ $user->streak_days }}
-                    </span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-400 text-sm">Mejor racha</span>
-                    <span class="font-bold text-yellow-400">
-                        ⚡ {{ $bestStreak }}
-                    </span>
-                </div>
                 
-                <div class="pt-2 border-t border-gray-800">
-                    <p class="text-gray-400 text-xs mb-2">
-                        Días activos este mes
-                    </p>
-                    <div class="flex justify-between items-center">
-                        <div class="w-full bg-gray-800 rounded-full h-2 mr-3">
-                            <div class="h-2 bg-orange-500 rounded-full"
-                                 style="width: {{ round(($activeDaysThisMonth / $daysInMonth) * 100) }}%">
-                            </div>
-                        </div>
-                        <span class="text-white font-bold text-sm whitespace-nowrap">
-                            {{ $activeDaysThisMonth }}/{{ $daysInMonth }}
+                {{-- Days learning --}}
+                <div class="flex justify-between items-center p-3 
+                            bg-gray-800/50 rounded-xl">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">📖</span>
+                        <span class="text-gray-300 text-sm font-medium">
+                            Días aprendiendo
                         </span>
                     </div>
+                    <span class="font-black text-white text-xl">
+                        {{ (int) $daysLearning }}
+                    </span>
                 </div>
 
-                @if($peakHour !== false && $totalLessonsCompleted > 0)
-                <div class="pt-2 border-t border-gray-800">
-                    <p class="text-gray-400 text-xs">Hora más productiva</p>
-                    <p class="text-white font-bold mt-1">
-                        🕐 {{ str_pad($peakHour, 2, '0', STR_PAD_LEFT) }}:00 — 
-                        {{ str_pad($peakHour + 1, 2, '0', STR_PAD_LEFT) }}:00
-                    </p>
+                {{-- Current streak --}}
+                <div class="flex justify-between items-center p-3 
+                            bg-orange-500/10 border border-orange-500/20 
+                            rounded-xl">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🔥</span>
+                        <span class="text-gray-300 text-sm font-medium">
+                            Racha actual
+                        </span>
+                    </div>
+                    <span class="font-black text-orange-400 text-xl">
+                        {{ (int) $user->streak_days }}
+                    </span>
                 </div>
-                @endif
+
+                {{-- Best streak --}}
+                <div class="flex justify-between items-center p-3 
+                            bg-yellow-500/10 border border-yellow-500/20 
+                            rounded-xl">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">⚡</span>
+                        <span class="text-gray-300 text-sm font-medium">
+                            Mejor racha
+                        </span>
+                    </div>
+                    <span class="font-black text-yellow-400 text-xl">
+                        {{ (int) $bestStreak }}
+                    </span>
+                </div>
+
+
+
             </div>
         </div>
 

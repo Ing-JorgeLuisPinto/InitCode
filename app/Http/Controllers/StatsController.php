@@ -66,7 +66,7 @@ class StatsController extends Controller
             ->first();
         
         $daysLearning = $firstActivity
-            ? Carbon::parse($firstActivity->completed_at)->diffInDays(Carbon::now()) + 1
+            ? (int) Carbon::parse($firstActivity->completed_at)->diffInDays(Carbon::now()) + 1
             : 0;
 
         // === PROGRESO POR CURSO ===
@@ -88,41 +88,63 @@ class StatsController extends Controller
           ->values();
 
         // === DÍAS ACTIVOS ESTE MES ===
-        $activeDaysThisMonth = UserProgress::where('user_id', $userId)
-            ->whereMonth('completed_at', Carbon::now()->month)
-            ->whereYear('completed_at', Carbon::now()->year)
-            ->selectRaw('DATE(completed_at) as day')
-            ->distinct()
-            ->count();
-
         $daysInMonth = Carbon::now()->daysInMonth;
 
+        $activeDaysThisMonth = \DB::table('user_progress')
+            ->where('user_id', $userId)
+            ->whereNotNull('completed_at')
+            ->whereRaw('MONTH(completed_at) = ?', [Carbon::now()->month])
+            ->whereRaw('YEAR(completed_at) = ?', [Carbon::now()->year])
+            ->selectRaw('DATE(completed_at) as activity_day')
+            ->distinct()
+            ->get()
+            ->count();
+
+        // Hard cap — never exceed current day of month
+        // (can't have been active on future days)
+        $activeDaysThisMonth = min($activeDaysThisMonth, Carbon::now()->day);
+        $activeDaysThisMonth = min($activeDaysThisMonth, $daysInMonth);
+
         // === MEJOR RACHA ===
-        $allDates = UserProgress::where('user_id', $userId)
+        $allDates = \App\Models\UserProgress::where('user_id', $userId)
             ->whereNotNull('completed_at')
             ->selectRaw('DATE(completed_at) as day')
             ->distinct()
             ->orderBy('day')
             ->pluck('day')
-            ->map(fn($d) => Carbon::parse($d))
             ->toArray();
 
         $bestStreak = 0;
-        $currentStreak = 0;
-        for ($i = 0; $i < count($allDates); $i++) {
-            if ($i === 0) {
-                $currentStreak = 1;
-            } else {
-                $diff = $allDates[$i-1]->diffInDays($allDates[$i]);
+        $currentStreak = 1;
+
+        if (count($allDates) === 0) {
+            $bestStreak = 0;
+        } elseif (count($allDates) === 1) {
+            $bestStreak = 1;
+        } else {
+            for ($i = 1; $i < count($allDates); $i++) {
+                $prev = \Carbon\Carbon::parse($allDates[$i - 1]);
+                $curr = \Carbon\Carbon::parse($allDates[$i]);
+                $diff = $prev->diffInDays($curr);
+
                 if ($diff === 1) {
                     $currentStreak++;
                 } else {
-                    $bestStreak = max($bestStreak, $currentStreak);
+                    if ($currentStreak > $bestStreak) {
+                        $bestStreak = $currentStreak;
+                    }
                     $currentStreak = 1;
                 }
             }
+            // Check last streak
+            if ($currentStreak > $bestStreak) {
+                $bestStreak = $currentStreak;
+            }
         }
-        $bestStreak = max($bestStreak, $currentStreak);
+
+        // Also compare with the stored streak in users table
+        // in case the calculated one is lower
+        $bestStreak = max($bestStreak, $user->streak_days ?? 0);
 
         // === ACTIVIDAD POR HORA DEL DÍA ===
         $activityByHour = [];
