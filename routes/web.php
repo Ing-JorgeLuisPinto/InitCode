@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\StatsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -59,6 +60,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
     Route::post('/lesson-chat', [TutorController::class, 'lessonChat'])
         ->name('lesson.chat');
+    Route::get('/stats', [StatsController::class, 'index'])
+        ->name('stats.index');
+
     
     // Default profile routes from Breeze (modified to show)
     Route::get('/profile/edit', [ProfileController::class, 'edit'])

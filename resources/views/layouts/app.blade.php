@@ -434,6 +434,15 @@
             <x-nav-link :href="route('tutor.index')" :active="request()->routeIs('tutor.*')" icon="smart_toy">Tutor IA</x-nav-link>
             <x-nav-link :href="route('leaderboard.index')" :active="request()->routeIs('leaderboard.index')" icon="emoji_events">Clasificación</x-nav-link>
             <x-nav-link :href="route('profile.show')" :active="request()->routeIs('profile.*')" icon="person">Perfil</x-nav-link>
+            <a href="{{ route('stats.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg 
+                      text-gray-400 hover:text-white hover:bg-gray-800 
+                      transition text-sm font-medium
+                      {{ request()->routeIs('stats.*') 
+                          ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
+                          : '' }}">
+                📊 Estadísticas
+            </a>
             
             @if(Auth::user()->is_admin)
             <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')" icon="settings">⚙️ Admin Panel</x-nav-link>
