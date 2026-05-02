@@ -21,16 +21,23 @@ class ProfileController extends Controller
         $earnedIds = $user->userAchievements->pluck('achievement_id');
         $completedLessons = UserProgress::where('user_id', $user->id)->count();
         
-        $coursesProgress = Course::with('lessons')->get()->map(function($course) use ($user) {
-            $total = $course->lessons->count();
-            $completed = UserProgress::where('user_id', $user->id)
-                ->whereIn('lesson_id', $course->lessons->pluck('id'))
-                ->count();
-            return [
-                'course' => $course,
-                'percent' => $total > 0 ? round(($completed / $total) * 100) : 0
-            ];
-        });
+        $coursesProgress = Course::with('lessons')->get()
+            ->map(function($course) use ($user) {
+                $total = $course->lessons->count();
+                $completed = \App\Models\UserProgress::where('user_id', $user->id)
+                    ->whereIn('lesson_id', $course->lessons->pluck('id'))
+                    ->count();
+                // Cap completed at total to never exceed 100%
+                $completed = min($completed, $total);
+                $percent = $total > 0 
+                    ? (int) round(($completed / $total) * 100) 
+                    : 0;
+                $percent = min(100, $percent);
+                return [
+                    'course'  => $course,
+                    'percent' => $percent,
+                ];
+            });
 
         return view('profile.show', compact('user', 'allAchievements', 'earnedIds', 'completedLessons', 'coursesProgress'));
     }

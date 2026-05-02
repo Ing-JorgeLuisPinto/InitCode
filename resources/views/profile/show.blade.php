@@ -72,17 +72,54 @@
                     Progreso de Cursos
                 </h2>
                 <div class="bg-surface-container border border-outline-variant rounded-3xl p-6 space-y-6">
-                    @foreach($coursesProgress as $item)
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-on-surface truncate pr-2">{{ $item['course']->title }}</span>
-                            <span class="text-xs font-bold text-primary">{{ $item['percent'] }}%</span>
+                    <div class="space-y-3">
+                    @foreach($coursesProgress as $courseData)
+                    @php
+                        $pct = (int) min(100, $courseData['percent']);
+                        $isComplete = $pct >= 100;
+                    @endphp
+                    <div class="p-4 bg-gray-800/50 rounded-xl border 
+                                {{ $isComplete 
+                                    ? 'border-green-500/30' 
+                                    : 'border-gray-700/50' }}">
+                        
+                        {{-- Course header --}}
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-xl">{{ $courseData['course']->icon }}</span>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="font-medium text-white text-sm truncate">
+                                        {{ $courseData['course']->title }}
+                                    </p>
+                                    <span class="text-sm font-bold flex-shrink-0
+                                        {{ $isComplete ? 'text-green-400' : 'text-blue-400' }}">
+                                        {{ $pct }}%
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="w-full h-2 bg-surface-container-lowest rounded-full overflow-hidden border border-outline-variant">
-                            <div class="h-full bg-primary rounded-full transition-all duration-1000" style="width: {{ $item['percent'] }}%"></div>
+
+                        {{-- Progress bar --}}
+                        <div class="w-full bg-gray-700 rounded-full h-2 mb-3">
+                            <div class="h-2 rounded-full transition-all duration-500
+                                {{ $isComplete ? 'bg-green-500' : 'bg-blue-500' }}"
+                                 style="width: {{ $pct }}%">
+                            </div>
                         </div>
+
+                        {{-- Certificate button ONLY when complete --}}
+                        @if($isComplete)
+                        <a href="{{ route('certificate.generate', $courseData['course']) }}"
+                           class="flex items-center justify-center gap-2 w-full py-2 
+                                  bg-green-500/20 hover:bg-green-500/40 text-green-400 
+                                  border border-green-500/40 rounded-lg text-sm 
+                                  font-semibold transition-all">
+                            📄 Descargar certificado
+                        </a>
+                        @endif
                     </div>
                     @endforeach
+                    </div>
                 </div>
             </div>
         </div>

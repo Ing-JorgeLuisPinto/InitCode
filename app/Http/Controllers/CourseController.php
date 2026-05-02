@@ -23,8 +23,19 @@ class CourseController extends Controller
 
     public function show($slug)
     {
-        $course = Course::where('slug', $slug)->with(['lessons.exercises'])->firstOrFail();
-        $completedLessons = UserProgress::where('user_id', Auth::id())->pluck('lesson_id');
+        $course = Course::where('slug', $slug)
+            ->with(['lessons' => function($q) {
+                $q->orderBy('order');
+            }, 'lessons.exercises'])
+            ->firstOrFail();
+
+        // Get ONLY the lesson IDs that belong to this course
+        $courseLessonIds = $course->lessons->pluck('id');
+
+        // Get completed lessons for this user that belong to this course
+        $completedLessons = \App\Models\UserProgress::where('user_id', auth()->id())
+            ->whereIn('lesson_id', $courseLessonIds)
+            ->pluck('lesson_id');
 
         return view('courses.show', compact('course', 'completedLessons'));
     }

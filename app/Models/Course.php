@@ -10,6 +10,11 @@ class Course extends Model
 {
     protected $fillable = ['title', 'slug', 'description', 'icon', 'order', 'is_premium', 'level_id'];
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     public function level(): BelongsTo
     {
         return $this->belongsTo(Level::class);
