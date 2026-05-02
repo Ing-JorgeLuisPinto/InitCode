@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html class="dark" lang="{{ str_replace('_', '-', app()->getLocale()) }}" id="html-root">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,6 +10,18 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <!-- Anti-flash theme script -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('codepath-theme') || 'dark';
+            if (theme === 'light') {
+                document.documentElement.classList.remove('dark');
+            } else {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -117,7 +129,292 @@
         .glow-orange { box-shadow: 0 0 20px rgba(243, 99, 45, 0.2); }
         .glow-green { box-shadow: 0 0 20px rgba(0, 234, 120, 0.2); }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+        /* ============================================
+           LIGHT MODE OVERRIDES — only apply when
+           html does NOT have .dark class
+           ============================================ */
+
+        /* Base */
+        html:not(.dark) body {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+
+        /* Sidebar */
+        html:not(.dark) aside {
+            background-color: #ffffff !important;
+            border-right-color: #e2e8f0 !important;
+        }
+        html:not(.dark) aside a {
+            color: #475569 !important;
+        }
+        html:not(.dark) aside a:hover {
+            color: #0f172a !important;
+            background-color: #f1f5f9 !important;
+        }
+        html:not(.dark) aside .border-t {
+            border-color: #e2e8f0 !important;
+        }
+        html:not(.dark) aside p,
+        html:not(.dark) aside span {
+            color: #64748b !important;
+        }
+
+        /* Top bar */
+        html:not(.dark) header {
+            background-color: #ffffff !important;
+            border-bottom-color: #e2e8f0 !important;
+        }
+
+        /* Backgrounds */
+
+        /* Main content area */
+        html:not(.dark) main {
+            background-color: #f1f5f9 !important;
+        }
+
+        /* Standard gray scale */
+        html:not(.dark) .bg-gray-950 {
+            background-color: #f1f5f9 !important;
+        }
+        html:not(.dark) .bg-gray-900 {
+            background-color: #ffffff !important;
+        }
+        html:not(.dark) .bg-gray-800 {
+            background-color: #e8eef5 !important;
+        }
+        html:not(.dark) .bg-gray-700 {
+            background-color: #d1dae6 !important;
+        }
+
+        /* Custom design system surface colors */
+        html:not(.dark) .bg-background {
+            background-color: #f1f5f9 !important;
+        }
+        html:not(.dark) .bg-surface {
+            background-color: #f1f5f9 !important;
+        }
+        html:not(.dark) .bg-surface-dim {
+            background-color: #e8eef5 !important;
+        }
+        html:not(.dark) .bg-surface-bright {
+            background-color: #ffffff !important;
+        }
+        html:not(.dark) .bg-surface-container-lowest {
+            background-color: #ffffff !important;
+        }
+        html:not(.dark) .bg-surface-container-low {
+            background-color: #f8fafc !important;
+        }
+        html:not(.dark) .bg-surface-container {
+            background-color: #f1f5f9 !important;
+        }
+        html:not(.dark) .bg-surface-container-high {
+            background-color: #e8eef5 !important;
+        }
+        html:not(.dark) .bg-surface-container-highest {
+            background-color: #e2e8f0 !important;
+        }
+
+        /* Hardcoded hex classes used in views */
+        html:not(.dark) [class*="bg-[#0A0F1E]"],
+        html:not(.dark) [class*="bg-[#0a0f1e]"],
+        html:not(.dark) [class*="bg-[#090e1c]"],
+        html:not(.dark) [class*="bg-[#0e1322]"] {
+            background-color: #f1f5f9 !important;
+        }
+        html:not(.dark) [class*="bg-[#1a1f2f]"],
+        html:not(.dark) [class*="bg-[#1A1F2F]"],
+        html:not(.dark) [class*="bg-[#161b2b]"] {
+            background-color: #ffffff !important;
+        }
+        html:not(.dark) [class*="bg-[#1F2937]"],
+        html:not(.dark) [class*="bg-[#1f2937]"],
+        html:not(.dark) [class*="bg-[#25293a]"],
+        html:not(.dark) [class*="bg-[#2f3445]"] {
+            background-color: #e8eef5 !important;
+        }
+
+        /* Custom design system text colors */
+        html:not(.dark) main .text-on-surface,
+        html:not(.dark) main .text-on-background {
+            color: #0f172a !important;
+        }
+        html:not(.dark) main .text-on-surface-variant {
+            color: #475569 !important;
+        }
+        html:not(.dark) .text-slate-400 {
+            color: #64748b !important;
+        }
+        html:not(.dark) .text-slate-500 {
+            color: #64748b !important;
+        }
+
+        /* Custom design system border colors */
+        html:not(.dark) .border-outline-variant {
+            border-color: #e2e8f0 !important;
+        }
+        html:not(.dark) [class*="border-[#1F2937]"],
+        html:not(.dark) [class*="border-[#1f2937]"] {
+            border-color: #e2e8f0 !important;
+        }
+
+        /* Text — ONLY inside main content, not buttons */
+        html:not(.dark) main .text-white {
+            color: #0f172a !important;
+        }
+        html:not(.dark) main .text-gray-100,
+        html:not(.dark) main .text-gray-200 {
+            color: #1e293b !important;
+        }
+        html:not(.dark) main .text-gray-300 {
+            color: #334155 !important;
+        }
+        html:not(.dark) main .text-gray-400 {
+            color: #475569 !important;
+        }
+        html:not(.dark) main .text-gray-500 {
+            color: #64748b !important;
+        }
+
+        /* Borders */
+        html:not(.dark) .border-gray-800 {
+            border-color: #e2e8f0 !important;
+        }
+        html:not(.dark) .border-gray-700 {
+            border-color: #cbd5e1 !important;
+        }
+
+        /* Inputs */
+        html:not(.dark) input:not([type="checkbox"]):not([type="radio"]),
+        html:not(.dark) textarea,
+        html:not(.dark) select {
+            background-color: #ffffff !important;
+            border-color: #94a3b8 !important;
+            color: #0f172a !important;
+        }
+        html:not(.dark) input::placeholder,
+        html:not(.dark) textarea::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        /* Progress bar tracks */
+        html:not(.dark) .bg-gray-800.rounded-full,
+        html:not(.dark) .bg-gray-700.rounded-full {
+            background-color: #cbd5e1 !important;
+        }
+
+        /* Tables */
+        html:not(.dark) thead tr {
+            background-color: #e2e8f0 !important;
+        }
+        html:not(.dark) thead th {
+            color: #475569 !important;
+        }
+        html:not(.dark) tbody td {
+            color: #334155 !important;
+        }
+        html:not(.dark) .divide-gray-800 > * + * {
+            border-color: #e2e8f0 !important;
+        }
+
+        /* Cards */
+        html:not(.dark) main .bg-gray-900.rounded-xl,
+        html:not(.dark) main .bg-gray-900.rounded-2xl,
+        html:not(.dark) main .bg-gray-800.rounded-xl,
+        html:not(.dark) main .bg-gray-800.rounded-2xl {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        /* ── Hover states in light mode ── */
+        /* Actividad reciente rows: hover:bg-surface-container-high */
+        html:not(.dark) [class*="hover:bg-surface-container-high"]:hover {
+            background-color: #dde4ed !important;
+        }
+        html:not(.dark) [class*="hover:bg-surface-container"]:hover {
+            background-color: #e2e8f0 !important;
+        }
+        /* Courses / lesson rows: hover:bg-gray-800, hover:bg-gray-700 */
+        html:not(.dark) [class*="hover:bg-gray-800"]:hover {
+            background-color: #dde4ed !important;
+        }
+        html:not(.dark) [class*="hover:bg-gray-700"]:hover {
+            background-color: #e2e8f0 !important;
+        }
+        /* Keep text readable on hover */
+        html:not(.dark) [class*="hover:bg-surface-container-high"]:hover,
+        html:not(.dark) [class*="hover:bg-surface-container-high"]:hover *,
+        html:not(.dark) [class*="hover:bg-gray-800"]:hover,
+        html:not(.dark) [class*="hover:bg-gray-800"]:hover * {
+            color: #0f172a !important;
+        }
+
+        /* CodeMirror */
+        html:not(.dark) .CodeMirror {
+            background: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        html:not(.dark) .CodeMirror-gutters {
+            background: #e2e8f0 !important;
+            border-color: #cbd5e1 !important;
+        }
+        html:not(.dark) .CodeMirror-linenumber {
+            color: #64748b !important;
+        }
+
+        /* Pills/badges in top bar */
+        html:not(.dark) header .bg-gray-800 {
+            background-color: #e2e8f0 !important;
+        }
+        html:not(.dark) header .text-gray-400 {
+            color: #475569 !important;
+        }
+
+        /* Theme toggle */
+        html:not(.dark) #theme-toggle {
+            background-color: #e2e8f0 !important;
+            border-color: #cbd5e1 !important;
+        }
+        html:not(.dark) #theme-toggle:hover {
+            background-color: #cbd5e1 !important;
+        }
+
+        /* ============================================
+           DARK MODE — protective rules so dark mode
+           is never accidentally overridden
+           ============================================ */
+        html.dark body {
+            background-color: #030712;
+            color: #ffffff;
+        }
+        html.dark main .text-white {
+            color: #ffffff !important;
+        }
+        html.dark main .text-gray-400 {
+            color: #9ca3af !important;
+        }
+        html.dark main .text-gray-300 {
+            color: #d1d5db !important;
+        }
+        html.dark .bg-gray-900 {
+            background-color: #111827 !important;
+        }
+        html.dark .bg-gray-800 {
+            background-color: #1f2937 !important;
+        }
+        html.dark .bg-gray-950 {
+            background-color: #030712 !important;
+        }
+        html.dark .border-gray-800 {
+            border-color: #1f2937 !important;
+        }
+        html.dark .border-gray-700 {
+            border-color: #374151 !important;
+        }
     </style>
+
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -178,6 +475,14 @@
                 <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">military_tech</span>
                 <span class="font-h2 text-sm text-secondary">{{ Auth::user()->level->level_number ?? 1 }}</span>
             </div>
+            <button id="theme-toggle"
+                    type="button"
+                    onclick="toggleTheme()"
+                    class="w-9 h-9 flex items-center justify-center rounded-full
+                           bg-gray-800 hover:bg-gray-700 border border-gray-700
+                           transition text-sm">
+                <span id="theme-icon">🌙</span>
+            </button>
             <button class="material-symbols-outlined text-slate-400 hover:text-white">notifications</button>
             <div class="rounded-full overflow-hidden">
                 @if(auth()->user()->avatar)
@@ -199,5 +504,29 @@
     <main class="ml-64 pt-[104px] p-8 min-h-screen bg-background">
         {{ $slot }}
     </main>
+<script>
+function toggleTheme() {
+    const html = document.getElementById('html-root');
+    const icon = document.getElementById('theme-icon');
+    
+    if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('codepath-theme', 'light');
+        if (icon) icon.textContent = '\u2600\ufe0f';
+    } else {
+        html.classList.add('dark');
+        localStorage.setItem('codepath-theme', 'dark');
+        if (icon) icon.textContent = '\ud83c\udf19';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const theme = localStorage.getItem('codepath-theme') || 'dark';
+    const icon = document.getElementById('theme-icon');
+    if (icon) {
+        icon.textContent = theme === 'light' ? '\u2600\ufe0f' : '\ud83c\udf19';
+    }
+});
+</script>
 </body>
 </html>
