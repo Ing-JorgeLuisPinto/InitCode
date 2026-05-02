@@ -28,9 +28,17 @@
                         </td>
                         <td class="px-8 py-6">
                             <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
-                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=161b2b&color=dee1f7" alt="{{ $user->name }}">
-                                </div>
+                                @if($user->avatar)
+                                    <img src="{{ asset('storage/' . $user->avatar) }}"
+                                         alt="{{ $user->name }}"
+                                         class="w-9 h-9 rounded-full object-cover border-2 border-gray-700">
+                                @else
+                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br
+                                                from-blue-600 to-green-400 flex items-center
+                                                justify-center text-white text-sm font-black flex-shrink-0">
+                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    </div>
+                                @endif
                                 <div>
                                     <p class="font-bold text-on-surface">{{ $user->name }}</p>
                                     @if($user->id === Auth::id())
