@@ -42,50 +42,76 @@ class ProfileController extends Controller
         return view('profile.show', compact('user', 'allAchievements', 'earnedIds', 'completedLessons', 'coursesProgress'));
     }
 
-    /**
-     * Display the user's profile form.
-     */
-    public function edit(Request $request): View
+    public function edit()
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        $user = auth()->user();
+        return view('profile.edit', compact('user'));
     }
 
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request)
     {
-        $request->user()->fill($request->validated());
+        $user = auth()->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $request->validate([
+            'name'   => 'required|string|max:255',
+            'bio'    => 'nullable|string|max:300',
+            'avatar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ], [
+            'name.required'  => 'El nombre es obligatorio.',
+            'avatar.image'   => 'El archivo debe ser una imagen.',
+            'avatar.max'     => 'La imagen no puede superar 2MB.',
+        ]);
+
+        $data = [
+            'name' => $request->name,
+            'bio'  => $request->bio,
+        ];
+
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar && \Storage::disk('public')->exists($user->avatar)) {
+                \Storage::disk('public')->delete($user->avatar);
+            }
+
+            $file = $request->file('avatar');
+            $filename = 'avatar_' . auth()->id() . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+            // Store with intervention or direct copy to preserve quality
+            $file->storeAs('avatars', $filename, 'public');
+            $data['avatar'] = 'avatars/' . $filename;
         }
 
-        $request->user()->save();
+        $user->update($data);
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return redirect()->route('profile.show')
+            ->with('success', '✅ Perfil actualizado correctamente');
     }
 
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
+    public function updatePassword(Request $request)
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
+        $request->validate([
+            'current_password' => 'required',
+            'password'         => 'required|min:8|confirmed',
+        ], [
+            'current_password.required' => 'Ingresa tu contraseña actual.',
+            'password.required'         => 'La nueva contraseña es obligatoria.',
+            'password.min'              => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed'        => 'Las contraseñas no coinciden.',
         ]);
 
-        $user = $request->user();
+        $user = auth()->user();
 
-        Auth::logout();
+        if (!\Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors([
+                'current_password' => 'La contraseña actual no es correcta.'
+            ]);
+        }
 
-        $user->delete();
+        $user->update([
+            'password' => \Hash::make($request->password)
+        ]);
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return redirect()->route('profile.show')
+            ->with('success', '✅ Contraseña actualizada correctamente');
     }
 }

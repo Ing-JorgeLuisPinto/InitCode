@@ -179,8 +179,18 @@
                 <span class="font-h2 text-sm text-secondary">{{ Auth::user()->level->level_number ?? 1 }}</span>
             </div>
             <button class="material-symbols-outlined text-slate-400 hover:text-white">notifications</button>
-            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary">
-                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=508ff8&color=fff" alt="{{ Auth::user()->name }}">
+            <div class="rounded-full overflow-hidden">
+                @if(auth()->user()->avatar)
+                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}"
+                         alt="Avatar"
+                         class="w-9 h-9 rounded-full object-cover border-2 border-gray-700">
+                @else
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 
+                                to-green-400 flex items-center justify-center 
+                                text-white text-sm font-black">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    </div>
+                @endif
             </div>
         </div>
     </header>

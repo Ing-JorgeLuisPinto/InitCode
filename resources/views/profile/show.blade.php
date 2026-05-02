@@ -1,11 +1,29 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto space-y-10">
+        {{-- Success message --}}
+        @if(session('success'))
+        <div class="mb-6 p-4 bg-green-500/10 border border-green-500/30 
+                    rounded-xl text-green-400 text-sm font-medium">
+            {{ session('success') }}
+        </div>
+        @endif
+        
         <!-- Profile Header -->
         <section class="bg-surface-container border border-outline-variant rounded-3xl p-10 flex flex-col md:flex-row items-center gap-10">
             <div class="relative">
-                <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-primary shadow-2xl">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=508ff8&color=fff&size=128" alt="{{ $user->name }}">
-                </div>
+                @if($user->avatar)
+                    <img src="{{ asset('storage/' . $user->avatar) }}"
+                         alt="Avatar de {{ $user->name }}"
+                         class="w-24 h-24 rounded-full object-cover border-2 
+                                border-blue-500 shadow-lg shadow-blue-500/20">
+                @else
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br 
+                                from-blue-600 to-green-400 flex items-center 
+                                justify-center text-white text-3xl font-black
+                                shadow-lg shadow-blue-500/20">
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                    </div>
+                @endif
                 <div class="absolute -bottom-2 -right-2 bg-secondary text-on-secondary w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-xl">
                     🔥
                 </div>
@@ -18,6 +36,12 @@
                     </span>
                 </div>
                 <p class="text-on-surface-variant text-lg">Miembro desde {{ $user->created_at->format('M Y') }}</p>
+                
+                @if($user->bio)
+                <p class="text-gray-400 text-sm mt-2 max-w-md">
+                    {{ $user->bio }}
+                </p>
+                @endif
                 <div class="flex flex-wrap justify-center md:justify-start gap-8 pt-2">
                     <div class="text-center md:text-left">
                         <p class="text-2xl font-black text-on-surface">{{ number_format($user->xp) }}</p>
@@ -34,8 +58,12 @@
                 </div>
             </div>
             <div class="flex flex-col gap-3">
-                <a href="{{ route('profile.edit') }}" class="px-8 py-3 bg-surface-container-high border border-outline-variant rounded-xl font-bold hover:bg-surface-container-highest transition-all text-center">
-                    Editar Perfil
+                <a href="{{ route('profile.edit') }}"
+                   class="flex items-center gap-2 px-4 py-2 bg-gray-800 
+                          hover:bg-gray-700 text-gray-300 hover:text-white 
+                          border border-gray-700 rounded-xl text-sm 
+                          font-medium transition">
+                    ✏️ Editar perfil
                 </a>
             </div>
         </section>
