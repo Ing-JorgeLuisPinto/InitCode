@@ -20,31 +20,109 @@ Route::get('/', function () {
 Route::get('/select-level', [AuthController::class, 'selectLevel'])->name('select-level')->middleware('auth');
 Route::post('/select-level', [AuthController::class, 'saveLevel'])->name('select-level.save')->middleware('auth');
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [AdminController::class, 'index'])->name('index');
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
     
+    // Dashboard
+    Route::get('/', [AdminController::class, 'index'])
+        ->name('index');
+
     // Courses
-    Route::get('/courses', [AdminController::class, 'courses'])->name('courses');
-    Route::get('/courses/create', [AdminController::class, 'createCourse'])->name('courses.create');
-    Route::post('/courses', [AdminController::class, 'storeCourse'])->name('courses.store');
-    Route::get('/courses/{course}/edit', [AdminController::class, 'editCourse'])->name('courses.edit');
-    Route::put('/courses/{course}', [AdminController::class, 'updateCourse'])->name('courses.update');
-    
+    Route::get('/courses', [AdminController::class, 'courses'])
+        ->name('courses');
+    Route::get('/courses/create', 
+        [AdminController::class, 'createCourse'])
+        ->name('courses.create');
+    Route::post('/courses', 
+        [AdminController::class, 'storeCourse'])
+        ->name('courses.store');
+    Route::get('/courses/{course}/edit', 
+        [AdminController::class, 'editCourse'])
+        ->name('courses.edit');
+    Route::put('/courses/{course}', 
+        [AdminController::class, 'updateCourse'])
+        ->name('courses.update');
+    Route::delete('/courses/{course}', 
+        [AdminController::class, 'destroyCourse'])
+        ->name('courses.destroy');
+
     // Lessons
-    Route::get('/courses/{course}/lessons', [AdminController::class, 'lessons'])->name('lessons');
-    Route::get('/courses/{course}/lessons/create', [AdminController::class, 'createLesson'])->name('lessons.create');
-    Route::post('/courses/{course}/lessons', [AdminController::class, 'storeLesson'])->name('lessons.store');
-    Route::get('/courses/{course}/lessons/{lesson}/edit', [AdminController::class, 'editLesson'])->name('lessons.edit');
-    Route::put('/courses/{course}/lessons/{lesson}', [AdminController::class, 'updateLesson'])->name('lessons.update');
-    
+    Route::get('/courses/{course}/lessons', 
+        [AdminController::class, 'lessons'])
+        ->name('lessons');
+    Route::get('/courses/{course}/lessons/create', 
+        [AdminController::class, 'createLesson'])
+        ->name('lessons.create');
+    Route::post('/courses/{course}/lessons', 
+        [AdminController::class, 'storeLesson'])
+        ->name('lessons.store');
+    Route::get('/lessons/{lesson}', 
+        [AdminController::class, 'showLesson'])
+        ->name('lesson.show');
+    Route::get('/lessons/{lesson}/edit', 
+        [AdminController::class, 'editLesson'])
+        ->name('lessons.edit');
+    Route::put('/lessons/{lesson}', 
+        [AdminController::class, 'updateLesson'])
+        ->name('lessons.update');
+    Route::delete('/lessons/{lesson}', 
+        [AdminController::class, 'destroyLesson'])
+        ->name('lessons.destroy');
+
     // Exercises
-    Route::get('/lessons/{lesson}/exercise/edit', [AdminController::class, 'editExercise'])->name('exercises.edit');
-    Route::put('/lessons/{lesson}/exercise', [AdminController::class, 'updateExercise'])->name('exercises.update');
-    
+    Route::get('/lessons/{lesson}/exercise', 
+        [AdminController::class, 'editExercise'])
+        ->name('exercise.edit');
+    Route::post('/lessons/{lesson}/exercise', 
+        [AdminController::class, 'storeExercise'])
+        ->name('exercise.store');
+    Route::put('/exercises/{exercise}', 
+        [AdminController::class, 'updateExercise'])
+        ->name('exercise.update');
+    Route::delete('/exercises/{exercise}', 
+        [AdminController::class, 'destroyExercise'])
+        ->name('exercise.destroy');
+
     // Users
-    Route::get('/users', [AdminController::class, 'users'])->name('users');
-    Route::post('/users/{user}/toggle-premium', [AdminController::class, 'togglePremium'])->name('users.premium');
-    Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
+    Route::get('/users', [AdminController::class, 'users'])
+        ->name('users');
+    Route::get('/users/{user}', 
+        [AdminController::class, 'showUser'])
+        ->name('users.show');
+    Route::put('/users/{user}/toggle-premium', 
+        [AdminController::class, 'togglePremium'])
+        ->name('users.toggle-premium');
+    Route::put('/users/{user}/toggle-admin', 
+        [AdminController::class, 'toggleAdmin'])
+        ->name('users.toggle-admin');
+    Route::post('/users/{user}/reset-progress', 
+        [AdminController::class, 'resetUserProgress'])
+        ->name('users.reset-progress');
+    Route::delete('/users/{user}', 
+        [AdminController::class, 'destroyUser'])
+        ->name('users.destroy');
+
+    // Achievements
+    Route::get('/achievements', 
+        [AdminController::class, 'achievements'])
+        ->name('achievements');
+    Route::get('/achievements/create', 
+        [AdminController::class, 'createAchievement'])
+        ->name('achievements.create');
+    Route::post('/achievements', 
+        [AdminController::class, 'storeAchievement'])
+        ->name('achievements.store');
+    Route::get('/achievements/{achievement}/edit', 
+        [AdminController::class, 'editAchievement'])
+        ->name('achievements.edit');
+    Route::put('/achievements/{achievement}', 
+        [AdminController::class, 'updateAchievement'])
+        ->name('achievements.update');
+    Route::delete('/achievements/{achievement}', 
+        [AdminController::class, 'destroyAchievement'])
+        ->name('achievements.destroy');
 });
 
 Route::middleware(['auth'])->group(function () {

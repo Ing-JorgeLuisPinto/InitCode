@@ -43,6 +43,11 @@
                     @endif
                 </td>
                 <td class="px-6 py-4 flex gap-4">
+                    <a href="{{ route('admin.lesson.show', $lesson) }}"
+                       class="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/40 
+                              text-blue-400 rounded-lg text-xs transition">
+                        👁️ Ver
+                    </a>
                     <a href="{{ route('admin.lessons.edit', [$course, $lesson]) }}" class="text-primary hover:underline">Editar Contenido</a>
                     <a href="{{ route('admin.exercises.edit', $lesson) }}" class="text-secondary hover:underline">Gestionar Ejercicio</a>
                 </td>
