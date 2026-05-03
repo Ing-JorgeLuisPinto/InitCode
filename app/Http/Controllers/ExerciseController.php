@@ -41,18 +41,7 @@ class ExerciseController extends Controller
 
         $revealed = $request->boolean('revealed', false);
 
-        // Normalize for comparison
-        $submitted = $this->normalizeCode($raw);
-        $expected  = $this->normalizeCode($exercise->expected_output);
-        $solution  = $this->normalizeCode($exercise->solution_code);
-
-        $isCorrect = (
-            $submitted === $expected ||
-            $submitted === $solution ||
-            str_contains($submitted, $expected) ||
-            str_contains($solution, $submitted) ||
-            $this->extractOutput($submitted) === $expected
-        );
+        $isCorrect = $this->isAnswerCorrect($raw, $exercise);
 
         // Check BEFORE saving if this is the first correct attempt
         $alreadySolvedCorrectly = UserExerciseAttempt::where('user_id', auth()->id())
@@ -119,14 +108,34 @@ class ExerciseController extends Controller
     {
         if ($code === null) return '';
         $code = str_replace(
-            ['// ESCRIBE TU CODIGO AQUI', '// Escribe tu código aquí...'],
+            ['// ESCRIBE TU CODIGO AQUI', '// Escribe tu código aquí...', '// Tu código aquí'],
             '', $code
         );
-        $code = strtolower(trim($code));
-        $code = preg_replace('/\s+/', ' ', $code);
-        $code = str_replace(["\r\n", "\r"], "\n", $code);
-        $code = preg_replace('/\s*([=;{}()\[\],])\s*/', '$1', $code);
+        $code = trim($code);
+        $code = preg_replace('/\r\n|\r/', "\n", $code);
+        $code = preg_replace('/[ \t]+/', ' ', $code);
+        $code = strtolower($code);
         return $code;
+    }
+
+    private function isAnswerCorrect(string $submitted, Exercise $exercise): bool
+    {
+        $normalizedSubmitted = $this->normalizeCode($submitted);
+        $normalizedExpected  = $this->normalizeCode($exercise->expected_output);
+        $normalizedSolution  = $this->normalizeCode($exercise->solution_code);
+
+        // Minimum length check — prevents single character bypass
+        if (strlen($normalizedSubmitted) < 2 && strlen($normalizedExpected) > 2) {
+            return false;
+        }
+
+        return (
+            $normalizedSubmitted === $normalizedExpected ||
+            $normalizedSubmitted === $normalizedSolution ||
+            str_contains($normalizedSubmitted, $normalizedExpected) ||
+            str_contains($normalizedSolution, $normalizedSubmitted) ||
+            $this->extractOutput($normalizedSubmitted) === $normalizedExpected
+        );
     }
 
     private function extractOutput(?string $code): string
