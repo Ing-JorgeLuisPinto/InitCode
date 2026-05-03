@@ -38,7 +38,7 @@ class TutorController extends Controller
         // System context as first exchange
         $contents[] = [
             'role' => 'user',
-            'parts' => [['text' => 'Eres CodeBot, tutor amigable de CodePath. Enseñas programación a principiantes. Explica con analogías simples, sin jerga técnica. No des soluciones directas, guía al usuario.']]
+            'parts' => [['text' => 'Eres CodeBot, tutor amigable de CodePath. Enseñas programación a principiantes. Explica con analogías simples, sin jerga técnica. No des soluciones directas, guía al usuario. IMPORTANTE: Siempre termina tus respuestas completamente. Nunca dejes una frase a medias. Si necesitas ser breve, hazlo, pero SIEMPRE termina con una oración completa.']]
         ];
         $contents[] = [
             'role' => 'model',
@@ -77,7 +77,8 @@ REGLAS:
 1. Sé breve y motivador.
 2. NUNCA des el código de la solución.
 3. Da pistas conceptuales.
-4. Si preguntan algo fuera de programación, vuelve al tema.";
+4. Si preguntan algo fuera de programación, vuelve al tema.
+IMPORTANTE: Siempre termina tus respuestas completamente. Nunca dejes una frase a medias. Si necesitas ser breve, hazlo, pero SIEMPRE termina con una oración completa.";
 
         $reply = $this->callGemini([
             [
@@ -111,7 +112,7 @@ REGLAS:
                             'contents' => $contents,
                             'generationConfig' => [
                                 'temperature' => 0.7,
-                                'maxOutputTokens' => 500,
+                                'maxOutputTokens' => 2048,
                             ]
                         ]
                     );
