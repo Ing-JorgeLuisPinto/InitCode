@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Recuperar contraseña — CodePath</title>
+<title>Recuperar contraseña — InitCode</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -121,7 +121,7 @@ body {
 <div class="container">
     <div class="card">
         <div class="header">
-            <div class="logo">⚡ CodePath</div>
+            <div class="logo">⚡ InitCode</div>
             <div class="logo-sub">Plataforma de Aprendizaje</div>
         </div>
 
@@ -129,7 +129,7 @@ body {
             <h1 class="title">🔐 Recuperar contraseña</h1>
             <p class="text">
                 Hola, recibimos una solicitud para restablecer 
-                la contraseña de tu cuenta en CodePath.
+                la contraseña de tu cuenta en InitCode.
             </p>
             <p class="text">
                 Haz clic en el botón de abajo para crear 
@@ -164,8 +164,8 @@ body {
 
         <div class="footer">
             <p>
-                Este correo fue enviado por CodePath.<br>
-                © {{ date('Y') }} CodePath — Todos los derechos reservados.
+                Este correo fue enviado por InitCode.<br>
+                © {{ date('Y') }} InitCode — Todos los derechos reservados.
             </p>
         </div>
     </div>

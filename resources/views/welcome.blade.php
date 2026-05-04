@@ -11,7 +11,7 @@
             <header class="space-y-4">
                 <div class="flex flex-col items-center gap-2">
                     <span class="text-primary font-display text-8xl tracking-tighter bg-gradient-to-r from-primary to-indigo-400 bg-clip-text text-transparent font-black animate-pulse-subtle">
-                        CodePath
+                        InitCode
                     </span>
                     <div class="w-32 h-1 bg-primary rounded-full shadow-[0_0_20px_rgba(80,143,248,0.5)]"></div>
                 </div>

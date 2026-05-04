@@ -6,7 +6,7 @@
         {{-- Logo --}}
         <div class="text-center mb-8">
             <h1 class="text-3xl font-black text-white">
-                ⚡ CodePath
+                ⚡ InitCode
             </h1>
             <p class="text-gray-400 text-sm mt-1">
                 Crea una nueva contraseña

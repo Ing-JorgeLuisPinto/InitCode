@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'CodePath') }}</title>
+    <title>{{ config('app.name', 'InitCode') }}</title>
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
     <!-- Anti-flash theme script -->
     <script>
         (function() {
-            const theme = localStorage.getItem('codepath-theme') || 'dark';
+            const theme = localStorage.getItem('initcode-theme') || 'dark';
             if (theme === 'light') {
                 document.documentElement.classList.remove('dark');
             } else {
@@ -424,7 +424,7 @@
     <aside class="fixed left-0 top-0 h-full w-64 border-r border-[#1F2937] bg-[#0A0F1E] flex flex-col z-50">
         <div class="p-8">
             <a href="{{ route('dashboard') }}">
-                <h1 class="text-2xl font-black bg-gradient-to-r from-blue-400 to-indigo-600 bg-clip-text text-transparent font-h1">CodePath</h1>
+                <h1 class="text-2xl font-black bg-gradient-to-r from-blue-400 to-indigo-600 bg-clip-text text-transparent font-h1">InitCode</h1>
             </a>
             <p class="text-xs text-slate-400 font-label-caps mt-1">Aprende a programar</p>
         </div>
@@ -564,17 +564,17 @@ function toggleTheme() {
     
     if (html.classList.contains('dark')) {
         html.classList.remove('dark');
-        localStorage.setItem('codepath-theme', 'light');
+        localStorage.setItem('initcode-theme', 'light');
         if (icon) icon.textContent = '\u2600\ufe0f';
     } else {
         html.classList.add('dark');
-        localStorage.setItem('codepath-theme', 'dark');
+        localStorage.setItem('initcode-theme', 'dark');
         if (icon) icon.textContent = '\ud83c\udf19';
     }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const theme = localStorage.getItem('codepath-theme') || 'dark';
+    const theme = localStorage.getItem('initcode-theme') || 'dark';
     const icon = document.getElementById('theme-icon');
     if (icon) {
         icon.textContent = theme === 'light' ? '\u2600\ufe0f' : '\ud83c\udf19';

@@ -91,13 +91,13 @@
             // Find the textarea
             var textarea = document.getElementById('code-editor');
             if (!textarea) {
-                console.error('CodePath: #code-editor textarea not found');
+                console.error('InitCode: #code-editor textarea not found');
                 return;
             }
 
             // Initialize CodeMirror ONCE
             if (window.editor) {
-                console.warn('CodePath: editor already initialized, skipping');
+                console.warn('InitCode: editor already initialized, skipping');
                 return;
             }
 
@@ -130,7 +130,7 @@
             // Submit button handler
             var btn = document.getElementById('btn-verificar');
             if (!btn) {
-                console.error('CodePath: #btn-verificar button not found');
+                console.error('InitCode: #btn-verificar button not found');
                 return;
             }
 

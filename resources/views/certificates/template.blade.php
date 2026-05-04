@@ -199,7 +199,7 @@ html, body {
                     <div class="corner br"></div>
 
                     <div class="inner-content">
-                        <div class="brand">&#9889; CODEPATH</div>
+                        <div class="brand">&#9889; INITCODE</div>
                         <div class="label">Certificado de Finalización</div>
                         <div class="divider"></div>
                         
@@ -234,7 +234,7 @@ html, body {
                                 <tr>
                                     <td class="f-td">
                                         <div class="f-line"></div>
-                                        <div class="f-name">CodePath Platform</div>
+                                        <div class="f-name">InitCode Platform</div>
                                         <div class="f-lbl">Plataforma</div>
                                     </td>
                                     <td class="f-td">
@@ -253,7 +253,7 @@ html, body {
                     </div>
 
                     <div class="wm">
-                        codepath.site &nbsp;•&nbsp; 
+                        initcode.app &nbsp;•&nbsp; 
                         ID: CP-{{ strtoupper(substr(md5($user->id . $course->id), 0, 12)) }}
                     </div>
                 </div>

@@ -26,7 +26,7 @@ class CustomResetPassword extends Notification
         ], false));
 
         return (new MailMessage)
-            ->subject('🔐 Recupera tu contraseña — CodePath')
+            ->subject('🔐 Recupera tu contraseña — InitCode')
             ->view('emails.reset-password', [
                 'resetUrl' => $resetUrl,
                 'user'     => $notifiable,

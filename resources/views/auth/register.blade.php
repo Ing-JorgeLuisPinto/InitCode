@@ -11,7 +11,7 @@
             <div class="relative z-10 p-16 flex flex-col items-start gap-8 max-w-2xl">
                 <div class="flex flex-col gap-2">
                     <span class="text-primary font-display text-4xl tracking-tighter bg-gradient-to-r from-primary to-indigo-400 bg-clip-text text-transparent font-black">
-                        CodePath
+                        InitCode
                     </span>
                     <p class="text-xl text-on-surface-variant max-w-md">
                         Aprende a programar
@@ -37,7 +37,7 @@
         <section class="flex-1 flex items-center justify-center p-8 md:p-16 lg:p-24 bg-surface-container-lowest">
             <div class="w-full max-w-md flex flex-col gap-10">
                 <div class="md:hidden flex flex-col items-center gap-2 mb-4">
-                    <span class="text-primary text-4xl tracking-tighter font-black">CodePath</span>
+                    <span class="text-primary text-4xl tracking-tighter font-black">InitCode</span>
                     <div class="w-12 h-1 bg-primary rounded-full"></div>
                 </div>
                 <header class="space-y-2 text-center md:text-left">

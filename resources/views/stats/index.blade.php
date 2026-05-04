@@ -7,7 +7,7 @@
             📊 Mis Estadísticas
         </h1>
         <p class="text-gray-400">
-            Tu progreso detallado en CodePath
+            Tu progreso detallado en InitCode
         </p>
     </div>
 

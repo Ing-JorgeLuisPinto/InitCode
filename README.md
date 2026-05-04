@@ -1,8 +1,8 @@
-# 🚀 CodePath
+# 🚀 InitCode
 
 **Plataforma interactiva para aprender programación desde cero**
 
-CodePath es una aplicación web gamificada inspirada en Duolingo, diseñada para enseñar programación a personas sin experiencia previa. Combina lecciones cortas, ejercicios interactivos, un sistema de XP y rachas, y un tutor con Inteligencia Artificial.
+InitCode es una aplicación web gamificada inspirada en Duolingo, diseñada para enseñar programación a personas sin experiencia previa. Combina lecciones cortas, ejercicios interactivos, un sistema de XP y rachas, y un tutor con Inteligencia Artificial.
 
 ---
 
@@ -96,12 +96,12 @@ php artisan key:generate
 Abre el archivo `.env` y configura las siguientes variables:
 
 ```env
-APP_NAME=CodePath
+APP_NAME=InitCode
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=codepath
+DB_DATABASE=initcode
 DB_USERNAME=root
 DB_PASSWORD=
 
@@ -118,7 +118,7 @@ OPENAI_API_KEY=tu_api_key_de_openai_aquí
 
 - Abre `http://localhost/phpmyadmin`
 - Clic en **Nueva**
-- Nombre: `codepath`
+- Nombre: `initcode`
 - Cotejamiento: `utf8mb4_unicode_ci`
 - Clic en **Crear**
 
@@ -139,7 +139,7 @@ Esto creará todas las tablas y cargará los datos iniciales:
 ## 📁 Estructura del proyecto
 
 ```
-codepath/
+initcode/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/
@@ -279,4 +279,4 @@ Email: pintojorgeluis16@gmail.com
 
 ---
 
-> CodePath — *Tu camino hacia la programación* 🚀
+> InitCode — *Tu camino hacia la programación* 🚀
