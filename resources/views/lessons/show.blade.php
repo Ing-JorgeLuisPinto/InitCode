@@ -4,57 +4,110 @@
 .lesson-content {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem;
 }
+
 .explanation-block {
-    background: rgba(79, 142, 247, 0.08);
+    background: linear-gradient(135deg, 
+        rgba(79, 142, 247, 0.12) 0%, 
+        rgba(79, 142, 247, 0.06) 100%);
+    border: 1px solid rgba(79, 142, 247, 0.25);
     border-left: 4px solid #4F8EF7;
-    border-radius: 0 12px 12px 0;
-    padding: 16px 20px;
+    border-radius: 0 16px 16px 0;
+    padding: 18px 22px;
+    position: relative;
 }
+
 .analogy-block {
-    background: rgba(234, 179, 8, 0.08);
+    background: linear-gradient(135deg,
+        rgba(234, 179, 8, 0.10) 0%,
+        rgba(234, 179, 8, 0.04) 100%);
+    border: 1px solid rgba(234, 179, 8, 0.20);
     border-left: 4px solid #EAB308;
-    border-radius: 0 12px 12px 0;
-    padding: 16px 20px;
+    border-radius: 0 16px 16px 0;
+    padding: 18px 22px;
+    position: relative;
 }
+
 .example-block {
-    background: rgba(57, 255, 138, 0.06);
+    background: linear-gradient(135deg,
+        rgba(57, 255, 138, 0.08) 0%,
+        rgba(57, 255, 138, 0.03) 100%);
+    border: 1px solid rgba(57, 255, 138, 0.18);
     border-left: 4px solid #39FF8A;
-    border-radius: 0 12px 12px 0;
-    padding: 16px 20px;
+    border-radius: 0 16px 16px 0;
+    padding: 18px 22px;
+    position: relative;
 }
+
 .lesson-content h3 {
-    font-size: 13px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
-.explanation-block h3 { color: #60A5FA; }
-.analogy-block h3 { color: #FCD34D; }
-.example-block h3 { color: #34D399; }
+
+.explanation-block h3 { 
+    color: #93C5FD; 
+}
+
+.analogy-block h3 { 
+    color: #FCD34D; 
+}
+
+.example-block h3 { 
+    color: #6EE7B7; 
+}
+
 .lesson-content p {
     font-size: 15px;
-    line-height: 1.7;
+    line-height: 1.75;
     color: #D1D5DB;
+    margin: 0;
 }
-.lesson-content strong { color: #F9FAFB; font-weight: 600; }
-.lesson-content em { color: #93C5FD; font-style: normal; }
-.lesson-content code {
-    background: rgba(0,0,0,0.3);
-    border: 1px solid #374151;
+
+.lesson-content strong {
+    color: #F9FAFB;
+    font-weight: 700;
+    background: rgba(255,255,255,0.08);
+    padding: 1px 5px;
     border-radius: 4px;
-    padding: 1px 6px;
-    font-family: monospace;
+}
+
+.lesson-content em {
+    color: #93C5FD;
+    font-style: normal;
+    font-weight: 500;
+}
+
+.lesson-content code {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid #374151;
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
     font-size: 13px;
     color: #34D399;
 }
-/* HIDE solution code and expected output from left panel */
+
+/* Hide solution code blocks - never show answer */
 .example-block pre { display: none !important; }
 .resultado-esperado { display: none !important; }
 [class*="resultado"] { display: none !important; }
-[class*="expected"] { display: none !important; }
+[class*="expected-output"] { display: none !important; }
+
+/* CodeMirror styles */
+.CodeMirror {
+    min-height: 180px;
+    height: auto;
+    font-size: 14px;
+    border-radius: 8px;
+}
+.CodeMirror-scroll { min-height: 180px; }
 </style>
 
 <div class="flex h-screen overflow-hidden">

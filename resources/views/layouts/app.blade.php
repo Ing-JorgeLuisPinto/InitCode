@@ -429,20 +429,64 @@
             <p class="text-xs text-slate-400 font-label-caps mt-1">Aprende a programar</p>
         </div>
         <nav class="flex-1 px-4 space-y-2 mt-4">
-            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" icon="grid_view">Dashboard</x-nav-link>
-            <x-nav-link :href="route('courses.index')" :active="request()->routeIs('courses.*')" icon="school">Cursos</x-nav-link>
-            <x-nav-link :href="route('tutor.index')" :active="request()->routeIs('tutor.*')" icon="smart_toy">Tutor IA</x-nav-link>
-            <x-nav-link :href="route('leaderboard.index')" :active="request()->routeIs('leaderboard.index')" icon="emoji_events">Clasificación</x-nav-link>
-            <x-nav-link :href="route('profile.show')" :active="request()->routeIs('profile.*')" icon="person">Perfil</x-nav-link>
+            <a href="{{ route('dashboard') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg 
+                      text-sm font-medium transition-colors duration-150
+                      {{ request()->routeIs('dashboard') 
+                          ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
+                          : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
+                🏠 Dashboard
+            </a>
+            <a href="{{ route('courses.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg 
+                      text-sm font-medium transition-colors duration-150
+                      {{ request()->routeIs('courses.*') 
+                          ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
+                          : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
+                📚 Cursos
+            </a>
+            <a href="{{ route('tutor.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg 
+                      text-sm font-medium transition-colors duration-150
+                      {{ request()->routeIs('tutor.*') 
+                          ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
+                          : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
+                🤖 Tutor IA
+            </a>
+            <a href="{{ route('leaderboard.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg 
+                      text-sm font-medium transition-colors duration-150
+                      {{ request()->routeIs('leaderboard.*') 
+                          ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
+                          : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
+                🏆 Clasificación
+            </a>
+            <a href="{{ route('profile.show') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg 
+                      text-sm font-medium transition-colors duration-150
+                      {{ request()->routeIs('profile.*') 
+                          ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
+                          : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
+                👤 Perfil
+            </a>
             <a href="{{ route('stats.index') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg 
-                      text-gray-400 hover:text-white hover:bg-gray-800 
-                      transition text-sm font-medium
+                      text-sm font-medium transition-colors duration-150
                       {{ request()->routeIs('stats.*') 
                           ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
-                          : '' }}">
+                          : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
                 📊 Estadísticas
             </a>
+            @if(Route::has('review.index'))
+            <a href="{{ route('review.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg 
+                      text-sm font-medium transition-colors duration-150
+                      {{ request()->routeIs('review.*') 
+                          ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
+                          : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
+                🔄 Modo Repaso
+            </a>
+            @endif
             
             @if(Auth::user()->is_admin)
             <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')" icon="settings">⚙️ Admin Panel</x-nav-link>
