@@ -1,31 +1,52 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
-    </div>
-
-    @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-        </div>
-    @endif
-
-    <div class="mt-4 flex items-center justify-between">
-        <form method="POST" action="{{ route('verification.send') }}">
-            @csrf
-
-            <div>
-                <x-primary-button>
-                    {{ __('Resend Verification Email') }}
-                </x-primary-button>
+    <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-surface-container-lowest">
+        <div class="w-full max-w-md bg-surface-container border border-outline-variant p-8 rounded-2xl shadow-xl">
+            <div class="text-center mb-8">
+                <div class="text-6xl mb-4">📧</div>
+                <h1 class="text-2xl font-black text-white mb-2">
+                    Verifica tu correo
+                </h1>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    Te enviamos un enlace de verificación a 
+                    <strong class="text-white">{{ auth()->user()->email }}</strong>.
+                    Ábrelo y haz clic en el enlace para activar tu cuenta.
+                </p>
             </div>
-        </form>
 
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
+            @if (session('status') == 'verification-link-sent')
+            <div class="mb-6 p-4 bg-green-500/10 border border-green-500/30 
+                        rounded-xl text-green-400 text-sm text-center">
+                ✅ Se envió un nuevo enlace a tu correo. Revisa tu bandeja.
+            </div>
+            @endif
 
-            <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                {{ __('Log Out') }}
-            </button>
-        </form>
+            <div class="p-4 bg-blue-500/10 border border-blue-500/20 
+                        rounded-xl text-sm mb-6">
+                <p class="font-medium text-blue-400 mb-2">💡 ¿No encuentras el correo?</p>
+                <ul class="text-gray-400 space-y-1 text-xs">
+                    <li>• Revisa tu carpeta de <strong>spam o correo no deseado</strong></li>
+                    <li>• El asunto es: <strong>"Verifica tu dirección de email"</strong></li>
+                    <li>• Puede tardar hasta 2 minutos en llegar</li>
+                </ul>
+            </div>
+
+            <form method="POST" action="{{ route('verification.send') }}">
+                @csrf
+                <button type="submit"
+                        class="w-full py-3 bg-primary text-on-primary font-bold rounded-xl transition mb-4 hover:opacity-90">
+                    📨 Reenviar correo de verificación
+                </button>
+            </form>
+
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit"
+                        class="w-full py-3 border border-outline-variant hover:border-outline 
+                               text-on-surface-variant hover:text-on-surface font-medium 
+                               rounded-xl transition text-sm">
+                    Volver al inicio de sesión
+                </button>
+            </form>
+        </div>
     </div>
 </x-guest-layout>
