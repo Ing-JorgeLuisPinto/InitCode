@@ -30,6 +30,7 @@ class User extends Authenticatable
         'level_id',
         'xp',
         'streak_days',
+        'best_streak',
         'last_activity_date',
         'is_premium',
         'is_admin',
@@ -58,6 +59,7 @@ class User extends Authenticatable
             'last_activity_date' => 'date',
             'xp' => 'integer',
             'streak_days' => 'integer',
+            'best_streak' => 'integer',
             'is_premium' => 'boolean',
             'is_admin' => 'boolean',
         ];
@@ -115,20 +117,25 @@ class User extends Authenticatable
 
     public function updateStreak(): void
     {
-        $today = \Carbon\Carbon::now()->format('Y-m-d');
+        // Always read fresh values from DB to avoid stale cache
+        $freshUser = \DB::table('users')->where('id', $this->id)
+            ->select('streak_days', 'best_streak', 'last_activity_date')
+            ->first();
+
+        $currentBest   = $freshUser->best_streak ?? 0;
+        $currentStreak = $freshUser->streak_days ?? 0;
+
+        $today     = \Carbon\Carbon::now()->format('Y-m-d');
         $yesterday = \Carbon\Carbon::now()->subDay()->format('Y-m-d');
 
-        // Get last activity as plain Y-m-d string regardless of format
-        $lastActivity = null;
-        if ($this->last_activity_date) {
-            $lastActivity = \Carbon\Carbon::parse($this->last_activity_date)
-                ->format('Y-m-d');
-        }
+        $lastActivity = $freshUser->last_activity_date
+            ? \Carbon\Carbon::parse($freshUser->last_activity_date)->format('Y-m-d')
+            : null;
 
-        \Log::info('Streak check - today: ' . $today . 
-            ', yesterday: ' . $yesterday . 
+        \Log::info('Streak update - today: ' . $today .
             ', lastActivity: ' . ($lastActivity ?? 'null') .
-            ', current streak: ' . ($this->streak_days ?? 0));
+            ', currentStreak: ' . $currentStreak .
+            ', currentBest: ' . $currentBest);
 
         // Already updated today
         if ($lastActivity === $today) {
@@ -137,24 +144,28 @@ class User extends Authenticatable
         }
 
         if ($lastActivity === $yesterday) {
-            // Consecutive day — increment
-            $newStreak = ($this->streak_days ?? 0) + 1;
+            $newStreak = $currentStreak + 1;
             \Log::info('Consecutive day! New streak: ' . $newStreak);
         } else {
-            // Gap or first time — reset to 1
             $newStreak = 1;
-            \Log::info('Gap detected or first time. Reset to 1');
+            \Log::info('Gap or first time. Reset to 1');
         }
 
-        // Use DB update to avoid any casting issues
+        // Update best_streak if new streak beats the record
+        $newBest = max($newStreak, $currentBest);
+
+        \Log::info('New best streak: ' . $newBest);
+
         \DB::table('users')->where('id', $this->id)->update([
-            'streak_days' => $newStreak,
+            'streak_days'        => $newStreak,
             'last_activity_date' => $today,
+            'best_streak'        => $newBest,
         ]);
 
-        // Refresh local instance
-        $this->streak_days = $newStreak;
+        // Sync local instance
+        $this->streak_days        = $newStreak;
         $this->last_activity_date = $today;
+        $this->best_streak        = $newBest;
     }
 
     public function checkAchievements(): array

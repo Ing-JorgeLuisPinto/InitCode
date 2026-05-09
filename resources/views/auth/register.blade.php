@@ -64,7 +64,12 @@
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">mail</span>
                             <input id="email" name="email" type="email" value="{{ old('email') }}" required placeholder="nombre@ejemplo.com" class="w-full bg-surface-container border border-outline-variant rounded-lg py-3.5 pl-12 pr-4 text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                         </div>
-                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Ejemplo: usuario@correo.com
+                        </p>
+                        @error('email')
+                            <p class="text-red-400 text-xs mt-1">⚠️ {{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Password -->
@@ -74,6 +79,38 @@
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">lock</span>
                             <input id="password" name="password" type="password" required placeholder="••••••••" class="w-full bg-surface-container border border-outline-variant rounded-lg py-3.5 pl-12 pr-4 text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                         </div>
+                        
+                        <div class="mt-1 p-3 bg-gray-800/50 border border-gray-700 rounded-xl text-xs text-gray-400 space-y-1">
+                            <p class="font-medium text-gray-300 mb-2">La contraseña debe tener:</p>
+                            <p id="req-length"  class="flex items-center gap-2">
+                                <span class="req-icon">⚪</span> Mínimo 8 caracteres
+                            </p>
+                            <p id="req-upper"   class="flex items-center gap-2">
+                                <span class="req-icon">⚪</span> Al menos una mayúscula (A-Z)
+                            </p>
+                            <p id="req-lower"   class="flex items-center gap-2">
+                                <span class="req-icon">⚪</span> Al menos una minúscula (a-z)
+                            </p>
+                            <p id="req-number"  class="flex items-center gap-2">
+                                <span class="req-icon">⚪</span> Al menos un número (0-9)
+                            </p>
+                            <p id="req-symbol"  class="flex items-center gap-2">
+                                <span class="req-icon">⚪</span> Al menos un símbolo (!@#$%...)
+                            </p>
+                        </div>
+
+                        <div class="mt-2">
+                            <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                <span>Seguridad de la contraseña</span>
+                                <span id="strength-label">—</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div id="strength-bar" 
+                                     class="h-2 rounded-full transition-all duration-300"
+                                     style="width: 0%"></div>
+                            </div>
+                        </div>
+
                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
                     </div>
 
@@ -102,4 +139,55 @@
             </div>
         </section>
     </main>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.querySelector('input[name="password"]');
+        if (!passwordInput) return;
+
+        const requirements = {
+            length:  { el: document.getElementById('req-length'),  test: v => v.length >= 8 },
+            upper:   { el: document.getElementById('req-upper'),   test: v => /[A-Z]/.test(v) },
+            lower:   { el: document.getElementById('req-lower'),   test: v => /[a-z]/.test(v) },
+            number:  { el: document.getElementById('req-number'),  test: v => /[0-9]/.test(v) },
+            symbol:  { el: document.getElementById('req-symbol'),  test: v => /[^A-Za-z0-9]/.test(v) },
+        };
+
+        const bar   = document.getElementById('strength-bar');
+        const label = document.getElementById('strength-label');
+
+        const levels = [
+            { label: 'Muy débil',  color: '#ef4444', width: '20%' },
+            { label: 'Débil',      color: '#f97316', width: '40%' },
+            { label: 'Regular',    color: '#eab308', width: '60%' },
+            { label: 'Fuerte',     color: '#22c55e', width: '80%' },
+            { label: 'Muy fuerte', color: '#3b82f6', width: '100%' },
+        ];
+
+        passwordInput.addEventListener('input', function() {
+            const val   = this.value;
+            let passed  = 0;
+
+            Object.values(requirements).forEach(req => {
+                const ok = req.test(val);
+                if (ok) passed++;
+                if (req.el) {
+                    req.el.querySelector('.req-icon').textContent = ok ? '✅' : '⚪';
+                    req.el.style.color = ok ? '#4ade80' : '';
+                }
+            });
+
+            if (val.length === 0) {
+                bar.style.width     = '0%';
+                bar.style.background = '';
+                label.textContent   = '—';
+            } else {
+                const level = levels[Math.min(passed - 1, 4)];
+                bar.style.width      = level.width;
+                bar.style.background = level.color;
+                label.textContent    = level.label;
+                label.style.color    = level.color;
+            }
+        });
+    });
+    </script>
 </x-guest-layout>

@@ -42,6 +42,15 @@
 
                 <x-auth-session-status class="mb-4" :status="session('status')" />
 
+                @if ($errors->any())
+                <div class="mb-4 p-4 bg-red-500/10 border border-red-500/30 
+                            rounded-xl text-red-400 text-sm">
+                    @foreach ($errors->all() as $error)
+                        <p>❌ {{ $error }}</p>
+                    @endforeach
+                </div>
+                @endif
+
                 <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-6">
                     @csrf
                     <!-- Email Address -->

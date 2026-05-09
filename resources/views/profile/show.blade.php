@@ -49,7 +49,11 @@
                     </div>
                     <div class="text-center md:text-left">
                         <p class="text-2xl font-black text-on-surface">{{ $user->streak_days }}</p>
-                        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Racha de Días</p>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Racha actual</p>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <p class="text-2xl font-black text-on-surface">{{ $user->best_streak ?? 0 }}</p>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Mejor racha 🏅</p>
                     </div>
                     <div class="text-center md:text-left">
                         <p class="text-2xl font-black text-on-surface">{{ $completedLessons }}</p>

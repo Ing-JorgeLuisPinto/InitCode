@@ -16,7 +16,7 @@ class ProfileController extends Controller
 {
     public function show(Request $request): View
     {
-        $user = Auth::user()->load(['level', 'userAchievements.achievement']);
+        $user = Auth::user()->fresh()->load(['level', 'userAchievements.achievement']);
         $allAchievements = Achievement::all();
         $earnedIds = $user->userAchievements->pluck('achievement_id');
         $completedLessons = UserProgress::where('user_id', $user->id)->count();
