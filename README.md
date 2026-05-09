@@ -326,4 +326,4 @@ ID Estudiante: U00179255
 
 ## 📄 Licencia
 
-Proyecto académico — UNAB 2025. Todos los derechos reservados.
+Proyecto académico — UNAB 2026. Todos los derechos reservados.

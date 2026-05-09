@@ -17,8 +17,21 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/select-level', [AuthController::class, 'selectLevel'])->name('select-level')->middleware('auth');
-Route::post('/select-level', [AuthController::class, 'saveLevel'])->name('select-level.save')->middleware('auth');
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verify-otp',  [App\Http\Controllers\Auth\EmailOtpController::class, 'show'])
+        ->name('verification.otp.show');
+    Route::post('/email/send-otp',   [App\Http\Controllers\Auth\EmailOtpController::class, 'send'])
+        ->name('verification.otp.send');
+    Route::post('/email/verify-otp', [App\Http\Controllers\Auth\EmailOtpController::class, 'verify'])
+        ->name('verification.otp.verify');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/select-level', [AuthController::class, 'selectLevel'])
+        ->name('select-level');
+    Route::post('/select-level', [AuthController::class, 'saveLevel'])
+        ->name('select-level.save');
+});
 
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')
@@ -125,7 +138,7 @@ Route::middleware(['auth', 'admin'])
         ->name('achievements.destroy');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
     Route::get('/courses/{slug}', [CourseController::class, 'show'])->name('courses.show');

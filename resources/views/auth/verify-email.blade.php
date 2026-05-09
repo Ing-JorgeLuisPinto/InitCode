@@ -1,13 +1,13 @@
 <x-guest-layout>
     <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-surface-container-lowest">
-        <div class="w-full max-w-md bg-surface-container border border-outline-variant p-8 rounded-2xl shadow-xl">
+        <div class="w-full max-w-md bg-surface-container border border-outline-variant p-8 rounded-2xl shadow-xl text-center">
             <div class="text-center mb-8">
-                <div class="text-6xl mb-4">📧</div>
+                <div class="text-6xl mb-4 text-center mx-auto">📧</div>
                 <h1 class="text-2xl font-black text-white mb-2">
                     Verifica tu correo
                 </h1>
                 <p class="text-gray-400 text-sm leading-relaxed">
-                    Te enviamos un enlace de verificación a 
+                    Enviamos un enlace de verificación a 
                     <strong class="text-white">{{ auth()->user()->email }}</strong>.
                     Ábrelo y haz clic en el enlace para activar tu cuenta.
                 </p>
@@ -16,12 +16,12 @@
             @if (session('status') == 'verification-link-sent')
             <div class="mb-6 p-4 bg-green-500/10 border border-green-500/30 
                         rounded-xl text-green-400 text-sm text-center">
-                ✅ Se envió un nuevo enlace a tu correo. Revisa tu bandeja.
+                ✅ Se envió un nuevo enlace. Revisa tu bandeja de entrada.
             </div>
             @endif
 
             <div class="p-4 bg-blue-500/10 border border-blue-500/20 
-                        rounded-xl text-sm mb-6">
+                        rounded-xl text-sm mb-6 text-left">
                 <p class="font-medium text-blue-400 mb-2">💡 ¿No encuentras el correo?</p>
                 <ul class="text-gray-400 space-y-1 text-xs">
                     <li>• Revisa tu carpeta de <strong>spam o correo no deseado</strong></li>

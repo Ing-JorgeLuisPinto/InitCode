@@ -64,6 +64,16 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('select-level', absolute: false));
+        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        \App\Models\EmailVerificationCode::create([
+            'user_id'    => $user->id,
+            'code'       => $code,
+            'expires_at' => now()->addMinutes(15),
+        ]);
+
+        $user->notify(new \App\Notifications\VerifyEmailOtp($code));
+
+        return redirect()->route('verification.otp.show');
     }
 }
