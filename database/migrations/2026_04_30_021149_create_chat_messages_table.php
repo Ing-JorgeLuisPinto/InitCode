@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('chat_messages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->enum('role', ['user', 'assistant']);
+            $table->string('role')->default('user');
             $table->text('content');
             $table->timestamp('created_at')->useCurrent();
         });

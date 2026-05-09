@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('order')->default(0);
             $table->longText('content');
             $table->integer('xp_reward')->default(10);
-            $table->enum('type', ['reading', 'exercise', 'challenge'])->default('reading');
+            $table->string('type')->default('reading');
             $table->timestamps();
         });
     }
