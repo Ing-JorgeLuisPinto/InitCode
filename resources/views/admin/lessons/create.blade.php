@@ -1,40 +1,131 @@
-@extends('admin.layout')
+<x-admin-layout>
+<div class="max-w-4xl mx-auto px-6 py-8">
+    <div class="flex items-center gap-4 mb-6">
+        <a href="{{ route('admin.index', ['tab' => 'courses']) }}"
+           class="text-gray-400 hover:text-white transition text-sm">
+            ← Volver a Cursos
+        </a>
+    </div>
 
-@section('content')
-<div class="mb-8">
-    <h2 class="text-3xl font-bold">Nueva Lección</h2>
-    <p class="text-slate-400">Curso: {{ $course->title }}</p>
-</div>
+    <div class="mb-6">
+        <h1 class="text-2xl font-black text-white">➕ Nueva Lección</h1>
+        <p class="text-gray-400 text-sm mt-1">Curso: <span class="text-blue-400 font-bold">{{ $course->title }}</span></p>
+    </div>
 
-<div class="max-w-4xl bg-surface rounded-2xl border border-slate-800 p-8">
-    <form action="{{ route('admin.lessons.store', $course) }}" method="POST">
+    @if(isset($errors) && $errors->any())
+    <div class="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+        @foreach($errors->all() as $error)
+            <p>❌ {{ $error }}</p>
+        @endforeach
+    </div>
+    @endif
+
+    <form method="POST" action="{{ route('admin.lessons.store', $course) }}" class="space-y-6">
         @csrf
-        <div class="space-y-6">
-            <div class="grid grid-cols-4 gap-6">
-                <div class="col-span-3">
-                    <label class="block text-sm font-bold mb-2">Título de la Lección</label>
-                    <input type="text" name="title" required class="w-full bg-background border border-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:border-primary">
+
+        {{-- Lesson Details Card --}}
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-5">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                📖 Información de la Lección
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Título de la Lección</label>
+                    <input type="text" name="title" value="{{ old('title') }}" required
+                           placeholder="Ej: Introducción a Variables"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold mb-2">Orden</label>
-                    <input type="number" name="order" value="{{ $course->lessons()->count() + 1 }}" required class="w-full bg-background border border-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:border-primary">
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Orden</label>
+                    <input type="number" name="order" value="{{ old('order', $course->lessons()->count() + 1) }}" min="1" required
+                           class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Tipo de Lección</label>
+                    <select name="type" required
+                            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+                        <option value="reading" {{ old('type') === 'reading' ? 'selected' : '' }}>📖 Lectura</option>
+                        <option value="exercise" {{ old('type', 'exercise') === 'exercise' ? 'selected' : '' }}>💻 Ejercicio Práctico</option>
+                        <option value="challenge" {{ old('type') === 'challenge' ? 'selected' : '' }}>⚡ Desafío</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">XP de Recompensa (Lección)</label>
+                    <input type="number" name="xp_reward" value="{{ old('xp_reward', 50) }}" min="1" required
+                           class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500">
                 </div>
             </div>
 
             <div>
-                <label class="block text-sm font-bold mb-2">Contenido (HTML permitido)</label>
-                <textarea name="content" required rows="15" class="w-full bg-background border border-slate-800 rounded-xl px-4 py-3 font-mono text-sm focus:outline-none focus:border-primary" placeholder="<p>Bienvenido a esta lección...</p>"></textarea>
+                <label class="block text-sm font-medium text-gray-400 mb-2">Contenido Teórico (HTML permitido)</label>
+                <textarea name="content" rows="8" required
+                          placeholder="<p>Explica aquí el concepto que aprenderá el usuario...</p>"
+                          class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-blue-500 resize-y">{{ old('content') }}</textarea>
+            </div>
+        </div>
+
+        {{-- Exercise Details Card --}}
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-5">
+            <div>
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    💻 Ejercicio Práctico Asociado
+                </h2>
+                <p class="text-xs text-gray-400 mt-1">Completa estos campos si la lección incluye un ejercicio interactivo de código.</p>
             </div>
 
-            <div class="flex gap-4 pt-4">
-                <button type="submit" class="flex-1 bg-primary text-on-primary-container font-bold py-3 rounded-xl hover:opacity-90 transition-opacity">
-                    Guardar Lección
-                </button>
-                <a href="{{ route('admin.lessons', $course) }}" class="px-6 py-3 border border-slate-800 rounded-xl font-bold hover:bg-slate-800 transition-colors">
-                    Cancelar
-                </a>
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-2">Instrucciones del Ejercicio</label>
+                <textarea name="instructions" rows="3"
+                          placeholder="Instrucciones claras sobre qué debe resolver el estudiante..."
+                          class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 resize-y">{{ old('instructions') }}</textarea>
             </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Código Inicial (Starter Code)</label>
+                    <textarea name="starter_code" rows="6"
+                              placeholder="// Código base inicial..."
+                              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white font-mono text-xs focus:outline-none focus:border-blue-500 resize-y">{{ old('starter_code') }}</textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Código Solución</label>
+                    <textarea name="solution_code" rows="6"
+                              placeholder="// Código solución esperado..."
+                              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white font-mono text-xs focus:outline-none focus:border-blue-500 resize-y">{{ old('solution_code') }}</textarea>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Resultado Esperado (Output)</label>
+                    <textarea name="expected_output" rows="3"
+                              placeholder="Salida esperada en consola..."
+                              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white font-mono text-xs focus:outline-none focus:border-blue-500 resize-y">{{ old('expected_output') }}</textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">XP del Ejercicio (Opcional)</label>
+                    <input type="number" name="exercise_xp" value="{{ old('exercise_xp') }}" min="0"
+                           placeholder="Dejar vacío para usar los XP de la lección"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+        </div>
+
+        {{-- Form Actions --}}
+        <div class="flex items-center gap-4 pt-2">
+            <button type="submit"
+                    class="flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition shadow-lg shadow-blue-600/20 text-center">
+                Guardar Lección →
+            </button>
+            <a href="{{ route('admin.index', ['tab' => 'courses']) }}"
+               class="px-6 py-3.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold rounded-xl transition text-center">
+                Cancelar
+            </a>
         </div>
     </form>
 </div>
-@endsection
+</x-admin-layout>

@@ -30,7 +30,7 @@
             <a href="{{ route('admin.index') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg 
                       text-sm font-medium transition
-                      {{ request()->routeIs('admin.index') 
+                      {{ (request()->routeIs('admin.index') && (!request()->has('tab') || request()->query('tab') === 'dashboard'))
                           ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
                           : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
                 📊 Dashboard
@@ -39,19 +39,19 @@
             <p class="text-xs text-gray-600 uppercase tracking-widest 
                       px-3 py-2 mt-3">Contenido</p>
 
-            <a href="{{ route('admin.courses') }}"
+            <a href="{{ route('admin.index', ['tab' => 'courses']) }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg 
                       text-sm font-medium transition
-                      {{ request()->routeIs('admin.courses*') 
+                      {{ (request()->routeIs('admin.index') && request()->query('tab') === 'courses') 
                           ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
                           : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
                 📚 Cursos
             </a>
 
-            <a href="{{ route('admin.achievements') }}"
+            <a href="{{ route('admin.index', ['tab' => 'achievements']) }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg 
                       text-sm font-medium transition
-                      {{ request()->routeIs('admin.achievements*') 
+                      {{ (request()->routeIs('admin.index') && request()->query('tab') === 'achievements') 
                           ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
                           : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
                 🏆 Logros
@@ -88,8 +88,32 @@
         </div>
     </aside>
 
-    {{-- Main --}}
     <main class="ml-64 flex-1 min-h-screen">
+
+        @if(session('success'))
+        <div class="mx-6 mt-4 p-4 bg-green-500/10 border border-green-500/30 
+                    rounded-xl text-green-400 text-sm font-medium">
+            {{ session('success') }}
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="mx-6 mt-4 p-4 bg-red-500/10 border border-red-500/30 
+                    rounded-xl text-red-400 text-sm font-medium">
+            {{ session('error') }}
+        </div>
+        @endif
+
+        @if(isset($errors) && $errors->any())
+        <div class="mx-6 mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm font-medium">
+            <p class="font-bold mb-1.5 flex items-center gap-1.5">⚠️ Por favor corrige los siguientes errores:</p>
+            <ul class="list-disc list-inside space-y-1 text-xs text-red-300">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
 
         {{-- Top bar --}}
         <div class="sticky top-0 z-10 bg-gray-950/95 backdrop-blur 
@@ -104,22 +128,6 @@
         </div>
 
         <div class="p-8">
-            @if(session('success'))
-            <div class="mb-6 p-4 bg-green-500/10 border 
-                        border-green-500/30 rounded-xl text-green-400 
-                        text-sm font-medium flex items-center gap-2">
-                {{ session('success') }}
-            </div>
-            @endif
-
-            @if(session('error'))
-            <div class="mb-6 p-4 bg-red-500/10 border border-red-500/30 
-                        rounded-xl text-red-400 text-sm font-medium 
-                        flex items-center gap-2">
-                {{ session('error') }}
-            </div>
-            @endif
-
             @yield('content')
         </div>
     </main>
